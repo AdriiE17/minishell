@@ -6,12 +6,18 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:18:35 by victor            #+#    #+#             */
-/*   Updated: 2024/11/14 10:31:13 by victor           ###   ########.fr       */
+/*   Updated: 2024/11/17 13:57:37 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parse.h"
 
+/* ************************************************************************** */
+/* Expands environment variables within the input string. If a '$' character  */
+/* is found, it checks if it's followed by a valid environment variable or    */
+/* the special '$?', replacing it with the corresponding value. The function  */
+/* returns a new string with the expanded variables.                          */
+/* ************************************************************************** */
 char	*exp_env_vars(char *input, int exit_status)
 {
 	char	*expanded;
@@ -54,24 +60,38 @@ char	*exp_env_vars(char *input, int exit_status)
 	return (expanded);
 }
 
+/* ************************************************************************** */
+/* Determines if the given command is a built-in shell command. It compares   */
+/* the input string with a predefined list of built-in commands and returns   */
+/* 1 if it's a built-in command, otherwise returns 0.                         */
+/* ************************************************************************** */
 int	ft_is_builtin(char *cmd)
 {
-	if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "cd") == 0 ||
-			strcmp(cmd, "pwd1") == 0 || strcmp(cmd, "export") == 0 ||
-			strcmp(cmd, "unset") == 0 || strcmp(cmd, "env") == 0 ||
-			strcmp(cmd, "exit") == 0) {
-		return 1;
+	if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "cd") == 0
+		|| strcmp(cmd, "pwd1") == 0 || strcmp(cmd, "export") == 0
+		|| strcmp(cmd, "unset") == 0 || strcmp(cmd, "env") == 0
+		|| strcmp(cmd, "exit") == 0)
+	{
+		return (1);
 	}
-	return 0;
+	return (0);
 }
 
-void ft_command(char *cmd, int *exit_status)
+/* ************************************************************************** */
+/* Executes a non-built-in command by forking a new process. The command is   */
+/* tokenized into arguments using strtok, and then executed with execvp in    */
+/* the child process. The parent process waits for the child to finish and    */
+/* updates the exit status. If an error occurs during forking or execution,   */
+/* appropriate error messages are displayed.                                  */
+/* ************************************************************************** */
+void	ft_command(char *cmd, int *exit_status)
 {
 	pid_t	pid;
 	char	*args[64];
 	char	*token;
-	int		i = 0;
+	int		i;
 
+	i = 0;
 	token = strtok(cmd, " ");
 	while (token != NULL)
 	{
@@ -90,7 +110,7 @@ void ft_command(char *cmd, int *exit_status)
 	}
 	else if (pid < 0)
 	{
-		perror("fork");
+		perror ("fork");
 	}
 	else
 	{
@@ -99,11 +119,26 @@ void ft_command(char *cmd, int *exit_status)
 	}
 }
 
+/* ************************************************************************** */
+/* Handles the execution of built-in shell commands like cd, exit, echo,      */
+/* pwd, export, unset, and env. Based on the command, it performs the         */
+/* appropriate action, such as changing the directory, printing the current   */
+/* directory, setting/unsetting environment variables, or printing environment*/
+/* variables. The exit status is updated accordingly for each command.        */
+/* ************************************************************************** */
 void	ft_execute(char *cmd, int *exit_status)
 {
+	char		*path;
+	char		*arg;
+	char		*var;
+	char		*value;
+	extern char	**environ;
+	char		cwd[1024];
+	int			i;
+
 	if (strcmp(cmd, "cd") == 0)
 	{
-		char *path = strtok(NULL, " ");
+		path = strtok(NULL, " ");
 		if (path == NULL || chdir(path) == -1)
 		{
 			perror("cd");
@@ -120,7 +155,7 @@ void	ft_execute(char *cmd, int *exit_status)
 	}
 	else if (strcmp(cmd, "echo") == 0)
 	{
-		char *arg = strtok(NULL, " ");
+		arg = strtok(NULL, " ");
 		while (arg != NULL)
 		{
 			write(STDOUT_FILENO, arg, strlen(arg));
@@ -132,23 +167,26 @@ void	ft_execute(char *cmd, int *exit_status)
 	}
 	else if (strcmp(cmd, "pwd") == 0 || strcmp(cmd, "pwd1") == 0)
 	{
-		char cwd[1024];
 		if (getcwd(cwd, sizeof(cwd)) != NULL)
 		{
 			write(STDOUT_FILENO, cwd, strlen(cwd));
 			write(STDOUT_FILENO, "\n", 1);
 			*exit_status = 0;
-		} else {
+		}
+		else
+		{
 			perror("pwd");
 			*exit_status = 1;
 		}
-	} else if (strcmp(cmd, "export") == 0)
+	}
+	else if (strcmp(cmd, "export") == 0)
 	{
-		char *var = strtok(NULL, " ");
+		var = strtok(NULL, " ");
 		if (var)
 		{
-			char *value = strtok(NULL, " ");
-			if (value) {
+			value = strtok(NULL, " ");
+			if (value)
+			{
 				setenv(var, value, 1);
 				*exit_status = 0;
 			}
@@ -161,7 +199,7 @@ void	ft_execute(char *cmd, int *exit_status)
 	}
 	else if (strcmp(cmd, "unset") == 0)
 	{
-		char *var = strtok(NULL, " ");
+		var = strtok(NULL, " ");
 		if (var)
 		{
 			unsetenv(var);
@@ -175,8 +213,8 @@ void	ft_execute(char *cmd, int *exit_status)
 	}
 	else if (strcmp(cmd, "env") == 0)
 	{
-		extern char **environ;
-		for (int i = 0; environ[i] != NULL; i++)
+		i = -1;
+		while (environ[++i] != NULL)
 		{
 			write(STDOUT_FILENO, environ[i], strlen(environ[i]));
 			write(STDOUT_FILENO, "\n", 1);
