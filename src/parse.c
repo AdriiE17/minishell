@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:18:35 by victor            #+#    #+#             */
-/*   Updated: 2024/11/18 17:34:18 by vberdugo         ###   ########.fr       */
+/*   Updated: 2024/11/20 16:57:50 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,9 +94,8 @@ char	*exp_env_vars(char *input, int exit_status)
 int	ft_is_builtin(char *cmd)
 {
 	if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "cd") == 0
-		|| strcmp(cmd, "pwd1") == 0 || strcmp(cmd, "export") == 0
-		|| strcmp(cmd, "unset") == 0 || strcmp(cmd, "env") == 0
-		|| strcmp(cmd, "exit") == 0)
+		|| strcmp(cmd, "pwd") == 0 || strcmp(cmd, "export") == 0
+		|| strcmp(cmd, "unset") == 0 || strcmp(cmd, "env") == 0)
 		return (1);
 	return (0);
 }
@@ -172,10 +171,6 @@ void	ft_execute(char *cmd, int *exit_status)
 		{
 			*exit_status = 0;
 		}
-	}
-	else if (ft_strcmp(cmd, "exit") == 0)
-	{
-		exit(*exit_status);
 	}
 	else if (ft_strcmp(cmd, "echo") == 0)
 	{

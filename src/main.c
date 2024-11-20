@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:30:57 by victor            #+#    #+#             */
-/*   Updated: 2024/11/14 12:02:55 by victor           ###   ########.fr       */
+/*   Updated: 2024/11/20 16:52:33 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,9 @@ int	main(int argc, char *argv[], char *env[])
 	char	*cmd_token;
 	char	*sub_token;
 	char	*cmd;
+	int		pipefds[2];
+	int		prev_pipefd;
+	pid_t	pid;
 
 	exit_status = 0;
 	i = -1;
@@ -76,16 +79,57 @@ int	main(int argc, char *argv[], char *env[])
 		while (cmd_token != NULL)
 		{
 			sub_token = ft_strtok(cmd_token, "|");
+			prev_pipefd = 0;
 			while (sub_token != NULL)
 			{
 				cmd = sub_token;
-				if (ft_is_builtin(cmd))
-					ft_execute(cmd, &exit_status);
+				if (ft_strcmp(cmd, "exit") == 0)
+				{
+					printf("exit\n");
+					free(expanded_line);
+					free(line);
+					exit(exit_status);
+				}
+				if (pipe(pipefds) == -1)
+				{
+					perror("pipe");
+					return (1);
+				}
+				pid = fork();
+				if (pid == 0)
+				{
+					if (prev_pipefd)
+					{
+						dup2(prev_pipefd, STDIN_FILENO);
+						close(prev_pipefd);
+					}
+					if (strtok(NULL, "|") != NULL)
+					{
+						dup2(pipefds[1], STDOUT_FILENO);
+					}
+					close(pipefds[0]);
+					close(pipefds[1]);
+					if (ft_is_builtin(cmd))
+						ft_execute(cmd, &exit_status);
+					else
+						ft_command(cmd, &exit_status);
+					exit(0);
+				}
+				else if (pid < 0)
+				{
+					perror("fork");
+					exit(1);
+				}
 				else
-					ft_command(cmd, &exit_status);
+				{
+					close(pipefds[1]);
+					prev_pipefd = pipefds[0];
+				}
 				sub_token = ft_strtok(NULL, "|");
 			}
-			cmd_token = ft_strtok(NULL, ";");
+			while (wait(NULL) > 0)
+				;
+			cmd_token = strtok(NULL, ";");
 		}
 		free(expanded_line);
 		free(line);
