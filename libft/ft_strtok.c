@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 11:54:30 by victor            #+#    #+#             */
-/*   Updated: 2024/11/14 12:02:12 by victor           ###   ########.fr       */
+/*   Updated: 2024/11/26 18:47:19 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,16 @@ char	*ft_strtok(char *str, const char *delim)
 	while (*start && ft_strchr(delim, *start))
 		start++;
 	if (*start == '\0')
-		return (NULL);
+		return (last = NULL, NULL);
 	end = start;
 	while (*end && !ft_strchr(delim, *end))
 		end++;
 	if (*end)
+	{
 		*end = '\0';
-	if (*end == '\0')
-		last = NULL;
-	else
 		last = end + 1;
+	}
+	else
+		last = NULL;
 	return (start);
 }

@@ -6,7 +6,7 @@
 #    By: victor <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 10:39:30 by victor            #+#    #+#              #
-#    Updated: 2024/11/20 15:48:30 by vberdugo         ###   ########.fr        #
+#    Updated: 2024/11/26 18:36:58 by victor           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,7 @@ OBJ_DIR = ./obj
 OBJ = $(SRCS:src/%.c=$(OBJ_DIR)/%.o)
 
 # Include directories
-INCLUDE = inc/parse.h libft/libft.h
+INCLUDE = inc/minishell.h libft/libft.h
 
 # Compiler settings
 CC = cc

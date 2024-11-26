@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse.h                                            :+:      :+:    :+:   */
+/*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/11/20 15:41:25 by vberdugo         ###   ########.fr       */
+/*   Updated: 2024/11/26 18:38:06 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#ifndef PARSE_H
-# define PARSE_H
+#ifndef MINISHELL_H
+# define MINISHELL_H
 
 /* readline, rl_clear_history, rl_on_new_line, rl_replace_line, rl_redisplay */
 # include <readline/readline.h>
@@ -51,5 +51,7 @@ char	*exp_env_vars(char *input, int exit_status);
 int		ft_is_builtin(char *cmd);
 void	ft_execute(char *cmd, int *exit_status);
 int		count_pipes(char *str);
+void	execute_pipeline(char *cmd, int *exit_status);
+char **split_args(const char *cmd);
 
 #endif

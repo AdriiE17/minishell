@@ -6,11 +6,11 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:18:35 by victor            #+#    #+#             */
-/*   Updated: 2024/11/20 16:57:50 by vberdugo         ###   ########.fr       */
+/*   Updated: 2024/11/26 18:36:27 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parse.h"
+#include "minishell.h"
 
 /* ************************************************************************** */
 /* Expands environment variables within the input string. If a '$' character  */

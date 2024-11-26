@@ -6,11 +6,11 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:30:57 by victor            #+#    #+#             */
-/*   Updated: 2024/11/20 16:52:33 by vberdugo         ###   ########.fr       */
+/*   Updated: 2024/11/26 18:36:12 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parse.h"
+#include "minishell.h"
 
 char	*find_env_var(char *name, char *env[])
 {
@@ -28,6 +28,28 @@ char	*find_env_var(char *name, char *env[])
 	return (NULL);
 }
 
+char **split_args(const char *cmd) {
+	int count = 0;
+	char **args = NULL;
+	char *token = NULL;
+	char *cmd_copy = ft_strdup(cmd);
+	char *ptr = cmd_copy;
+
+	if (!cmd_copy)
+		return NULL;
+
+	while ((token = strsep(&ptr, " ")) != NULL) {
+		if (*token == '\0')
+			continue;
+		args = realloc(args, sizeof(char *) * (count + 1));
+		args[count++] = strdup(token);
+	}
+	args = realloc(args, sizeof(char *) * (count + 1));
+	args[count] = NULL;
+	free(cmd_copy);
+	return args;
+}
+
 int	main(int argc, char *argv[], char *env[])
 {
 	char	*line;
@@ -38,12 +60,12 @@ int	main(int argc, char *argv[], char *env[])
 	char	cwd[PATH_MAX];
 	char	prompt[PATH_MAX + HOST_NAME_MAX + 50];
 	char	*expanded_line;
-	char	*cmd_token;
-	char	*sub_token;
-	char	*cmd;
-	int		pipefds[2];
-	int		prev_pipefd;
-	pid_t	pid;
+	//char	*cmd_token;
+	//char	*sub_token;
+	//char	*cmd;
+	//int		pipefds[2];
+	//int		prev_pipefd;
+	//pid_t	pid;
 
 	exit_status = 0;
 	i = -1;
@@ -74,63 +96,22 @@ int	main(int argc, char *argv[], char *env[])
 		if (!line)
 			break ;
 		add_history(line);
-		expanded_line = exp_env_vars(line, exit_status);
-		cmd_token = strtok(expanded_line, ";");
-		while (cmd_token != NULL)
+// Expandir variables de entorno
+		if (ft_strcmp(line, "exit") == 0)
 		{
-			sub_token = ft_strtok(cmd_token, "|");
-			prev_pipefd = 0;
-			while (sub_token != NULL)
-			{
-				cmd = sub_token;
-				if (ft_strcmp(cmd, "exit") == 0)
-				{
-					printf("exit\n");
-					free(expanded_line);
-					free(line);
-					exit(exit_status);
-				}
-				if (pipe(pipefds) == -1)
-				{
-					perror("pipe");
-					return (1);
-				}
-				pid = fork();
-				if (pid == 0)
-				{
-					if (prev_pipefd)
-					{
-						dup2(prev_pipefd, STDIN_FILENO);
-						close(prev_pipefd);
-					}
-					if (strtok(NULL, "|") != NULL)
-					{
-						dup2(pipefds[1], STDOUT_FILENO);
-					}
-					close(pipefds[0]);
-					close(pipefds[1]);
-					if (ft_is_builtin(cmd))
-						ft_execute(cmd, &exit_status);
-					else
-						ft_command(cmd, &exit_status);
-					exit(0);
-				}
-				else if (pid < 0)
-				{
-					perror("fork");
-					exit(1);
-				}
-				else
-				{
-					close(pipefds[1]);
-					prev_pipefd = pipefds[0];
-				}
-				sub_token = ft_strtok(NULL, "|");
-			}
-			while (wait(NULL) > 0)
-				;
-			cmd_token = strtok(NULL, ";");
+			free(line);
+			printf("exit\n");
+			break;
 		}
+        expanded_line = exp_env_vars(line, exit_status);
+
+        // Tokenizar por comandos separados por ";"
+        char *cmd_token = ft_strtok(expanded_line, ";");
+        while (cmd_token != NULL) {
+            // Manejar cada comando con pipes
+            execute_pipeline(cmd_token, &exit_status);
+            cmd_token = strtok(NULL, ";");
+        }
 		free(expanded_line);
 		free(line);
 	}
