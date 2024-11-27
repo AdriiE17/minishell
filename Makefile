@@ -6,14 +6,15 @@
 #    By: victor <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 10:39:30 by victor            #+#    #+#              #
-#    Updated: 2024/11/26 18:36:58 by victor           ###   ########.fr        #
+#    Updated: 2024/11/27 14:03:16 by victor           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = minishell
 
 # List all your source files here
-SRCS = src/main.c src/parse.c src/pipes.c
+SRCS = src/main.c src/parse.c src/pipes.c src/built_utils.c src/builtins.c \
+	   src/pipes_utils.c
 
 # Set the object directory
 OBJ_DIR = ./obj

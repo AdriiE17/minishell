@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:18:35 by victor            #+#    #+#             */
-/*   Updated: 2024/11/26 18:36:27 by victor           ###   ########.fr       */
+/*   Updated: 2024/11/27 12:08:17 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,20 +84,6 @@ char	*exp_env_vars(char *input, int exit_status)
 	}
 	expanded[i] = '\0';
 	return (expanded);
-}
-
-/* ************************************************************************** */
-/* Determines if the given command is a built-in shell command. It compares   */
-/* the input string with a predefined list of built-in commands and returns   */
-/* 1 if it's a built-in command, otherwise returns 0.                         */
-/* ************************************************************************** */
-int	ft_is_builtin(char *cmd)
-{
-	if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "cd") == 0
-		|| strcmp(cmd, "pwd") == 0 || strcmp(cmd, "export") == 0
-		|| strcmp(cmd, "unset") == 0 || strcmp(cmd, "env") == 0)
-		return (1);
-	return (0);
 }
 
 /* ************************************************************************** */

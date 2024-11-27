@@ -6,77 +6,76 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 15:38:32 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/11/26 18:37:13 by victor           ###   ########.fr       */
+/*   Updated: 2024/11/27 14:01:11 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	count_pipes(char *str)
+void	handle_child(char *sub_t, int prev_fd, int pipefds[2], int *exit_s)
 {
-	int	count;
+	char	**args;
 
-	count = 0;
-	while (*str)
+	handle_pipe_redirection(prev_fd, pipefds);
+	args = split_args(sub_t);
+	if (ft_is_builtin(args[0]))
 	{
-		if (*str == '|')
-		{
-			count++;
-		}
-		str++;
+		ft_exec_builtin(args[0], exit_s);
+		exit(*exit_s);
 	}
-	return (count + 1);
+	else
+	{
+		exec_command(args);
+	}
 }
 
-void execute_pipeline(char *cmd, int *exit_status)
+void	execute_pipeline(char *cmd, int *exit_status)
 {
-	char *sub_token;
-	int pipefds[2];
-	int prev_pipefd = -1;
-	pid_t pid;
+	char	*sub_token;
+	int		pipefds[2];
+	int		prev_pipefd;
+	pid_t	pid;
 
+	prev_pipefd = -1;
 	sub_token = strtok(cmd, "|");
-	while (sub_token != NULL) {
-		if (pipe(pipefds) == -1) {
-			perror("pipe");
-			exit(EXIT_FAILURE);
-		}
+	while (sub_token != NULL)
+	{
+		if (pipe(pipefds) == -1)
+			handle_pipe_error();
 		pid = fork();
-		if (pid == 0) {
-			if (prev_pipefd != -1) {
-				dup2(prev_pipefd, STDIN_FILENO); // Leer del pipe previo
-				close(prev_pipefd);
-			}
-			if (strtok(NULL, "|") != NULL) { // No es el último comando
-				dup2(pipefds[1], STDOUT_FILENO); // Escribir al pipe actual
-			}
-			close(pipefds[0]);
-			close(pipefds[1]);
-			char **args = split_args(sub_token);
-			if (ft_is_builtin(args[0])) {
-				ft_execute(args[0], exit_status); // Ejecutar built-in
-				exit(*exit_status); // Terminar proceso hijo
-			} else {
-				if (execvp(args[0], args) == -1) {
-					perror("execvp");
-					exit(EXIT_FAILURE);
-				}
-			}
-		} else if (pid < 0) {
-			perror("fork");
-			exit(EXIT_FAILURE);
-		}
-		if (prev_pipefd != -1) {
-			close(prev_pipefd); // Cerrar el pipe anterior
-		}
-		close(pipefds[1]); // Cerrar el extremo de escritura del pipe actual
-		prev_pipefd = pipefds[0]; // El extremo de lectura es ahora el pipe previo
-
+		if (pid == 0)
+			handle_child(sub_token, prev_pipefd, pipefds, exit_status);
+		else if (pid < 0)
+			handle_fork_error();
+		close_pipe(prev_pipefd);
+		close(pipefds[1]);
+		prev_pipefd = pipefds[0];
 		sub_token = strtok(NULL, "|");
 	}
-	if (prev_pipefd != -1)
-		close(prev_pipefd);
-	while (wait(NULL) > 0)
-		;
+	close_pipe(prev_pipefd);
+	wait_for_children();
 }
 
+void	handle_pipe_redirection(int prev_pipefd, int pipefds[2])
+{
+	if (prev_pipefd != -1)
+	{
+		dup2(prev_pipefd, STDIN_FILENO);
+		close(prev_pipefd);
+	}
+	if (strtok(NULL, "|") != NULL)
+	{
+		dup2(pipefds[1], STDOUT_FILENO);
+	}
+	close(pipefds[0]);
+	close(pipefds[1]);
+}
+
+void	exec_command(char **args)
+{
+	if (execvp(args[0], args) == -1)
+	{
+		perror("execvp");
+		exit(EXIT_FAILURE);
+	}
+}

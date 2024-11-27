@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/11/26 18:38:06 by victor           ###   ########.fr       */
+/*   Updated: 2024/11/27 14:03:04 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -48,10 +48,25 @@
 
 void	ft_command(char *cmd, int *exit_status);
 char	*exp_env_vars(char *input, int exit_status);
+char	**split_args(const char *cmd);
+/* built-ins */
 int		ft_is_builtin(char *cmd);
-void	ft_execute(char *cmd, int *exit_status);
+void	ft_exec_builtin(char *cmd, int *exit_status);
+void	ft_execute_cd(int *exit_status);
+void	ft_execute_echo(int *exit_status);
+void	ft_execute_export(int *exit_status);
+void	ft_execute_unset(int *exit_status);
+void	ft_execute_env(int *exit_status);
+void	ft_execute_pwd(int *exit_status);
+/* pipes */
 int		count_pipes(char *str);
+void	handle_pipe_error(void);
+void	handle_fork_error(void);
+void	close_pipe(int pipefd);
+void	wait_for_children(void);
 void	execute_pipeline(char *cmd, int *exit_status);
-char **split_args(const char *cmd);
+void	handle_child(char *sub_t, int prev_fd, int pipefds[2], int *exit_s);
+void	handle_pipe_redirection(int prev_pipefd, int pipefds[2]);
+void	exec_command(char **args);
 
 #endif
