@@ -6,7 +6,7 @@
 #    By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/15 13:10:35 by vberdugo          #+#    #+#              #
-#    Updated: 2024/11/14 12:01:05 by victor           ###   ########.fr        #
+#    Updated: 2024/11/27 16:21:19 by victor           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ SRC = ft_atoi.c ft_bzero.c ft_calloc.c ft_isalpha.c ft_isdigit.c \
 	ft_putendl_fd.c ft_putnbr_fd.c ft_lstnew.c ft_lstadd_front.c \
 	ft_lstsize.c ft_lstlast.c ft_lstadd_back.c ft_lstdelone.c \
 	ft_lstclear.c ft_lstiter.c ft_lstmap.c get_next_line.c ft_printf.c \
-	ft_strcmp.c ft_strcpy.c ft_strcat.c ft_strtok.c
+	ft_strcmp.c ft_strcpy.c ft_strcat.c ft_strtok.c ft_realloc.c ft_strsep.c
 
 OBJS = ${SRC:%.c=%.o}
 

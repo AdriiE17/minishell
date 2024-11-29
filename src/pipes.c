@@ -6,12 +6,67 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 15:38:32 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/11/27 14:01:11 by victor           ###   ########.fr       */
+/*   Updated: 2024/11/28 14:05:18 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+/* ************************************************************************** */
+/* Splits the given command string into tokens (arguments) separated by space */
+/* Allocates memory dynamically for each token and returns an array of tokens */
+/* ************************************************************************** */
+static char	**tokenize_args(char *cmd_copy)
+{
+	int		c;
+	char	**arg;
+	char	*token;
+	char	*ptr;
+
+	c = 0;
+	arg = NULL;
+	ptr = cmd_copy;
+	token = ft_strsep(&ptr, " ");
+	while (token != NULL)
+	{
+		if (*token != '\0')
+		{
+			arg = ft_realloc(arg, sizeof(char *) * c, sizeof(char *) * (c + 1));
+			if (!arg)
+				return (NULL);
+			arg[c++] = ft_strdup(token);
+		}
+		token = ft_strsep(&ptr, " ");
+	}
+	arg = ft_realloc(arg, sizeof(char *) * c, sizeof(char *) * (c + 1));
+	if (!arg)
+		return (NULL);
+	arg[c] = NULL;
+	return (arg);
+}
+
+/* ************************************************************************** */
+/* Duplicates a command string and splits to arguments using tokenize_args.   */
+/* Frees the duplicated command string after tokenization.                    */
+/* ************************************************************************** */
+char	**split_args(const char *cmd)
+{
+	char	*cmd_copy;
+	char	**args;
+
+	cmd_copy = ft_strdup(cmd);
+	if (!cmd_copy)
+		return (NULL);
+	args = tokenize_args(cmd_copy);
+	free(cmd_copy);
+	return (args);
+}
+
+/* ************************************************************************** */
+/* Handles the execution of a single command in a child process.              */
+/* Sets up pipe redirections, splits the command into arguments, and executes */
+/* built-in commands or external programs.                                    */
+/* ************************************************************************** */
 void	handle_child(char *sub_t, int prev_fd, int pipefds[2], int *exit_s)
 {
 	char	**args;
@@ -25,10 +80,15 @@ void	handle_child(char *sub_t, int prev_fd, int pipefds[2], int *exit_s)
 	}
 	else
 	{
-		exec_command(args);
+		execute_and_handle_error(args);
 	}
 }
 
+/* ************************************************************************** */
+/* Executes a pipeline of commands separated by pipes.                        */
+/* Handles pipe creation, forking processes, and chaining commands through    */
+/* pipes. Waits for all child processes to complete.                          */
+/* ************************************************************************** */
 void	execute_pipeline(char *cmd, int *exit_status)
 {
 	char	*sub_token;
@@ -53,9 +113,14 @@ void	execute_pipeline(char *cmd, int *exit_status)
 		sub_token = strtok(NULL, "|");
 	}
 	close_pipe(prev_pipefd);
-	wait_for_children();
+	while (wait(NULL) > 0)
+		;
 }
 
+/* ************************************************************************** */
+/* Sets up redirections for pipes. Redirects input from the previous pipe and */
+/* output to the current pipe if there are more commands in the pipeline.     */
+/* ************************************************************************** */
 void	handle_pipe_redirection(int prev_pipefd, int pipefds[2])
 {
 	if (prev_pipefd != -1)
@@ -69,13 +134,4 @@ void	handle_pipe_redirection(int prev_pipefd, int pipefds[2])
 	}
 	close(pipefds[0]);
 	close(pipefds[1]);
-}
-
-void	exec_command(char **args)
-{
-	if (execvp(args[0], args) == -1)
-	{
-		perror("execvp");
-		exit(EXIT_FAILURE);
-	}
 }

@@ -6,11 +6,43 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:18:35 by victor            #+#    #+#             */
-/*   Updated: 2024/11/27 12:08:17 by victor           ###   ########.fr       */
+/*   Updated: 2024/11/28 14:04:57 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+static int	expand_exit_status(char *expanded, int i, int exit_status)
+{
+	char	*exit_str;
+	int		j;
+
+	exit_str = ft_itoa(exit_status);
+	j = 0;
+	while (exit_str[j])
+		expanded[i++] = exit_str[j++];
+	free(exit_str);
+	return (i);
+}
+
+static int	expand_env_var(char *expanded, char **ptr, int i)
+{
+	char	*env_var;
+
+	env_var = getenv(*ptr);
+	if (env_var)
+	{
+		while (*env_var)
+			expanded[i++] = *env_var++;
+		while (**ptr && **ptr != ' ' && **ptr != '$')
+			(*ptr)++;
+	}
+	else
+	{
+		(*ptr)++;
+	}
+	return (i);
+}
 
 /* ************************************************************************** */
 /* Expands environment variables within the input string. If a '$' character  */
@@ -22,15 +54,9 @@ char	*exp_env_vars(char *input, int exit_status)
 {
 	char	*expanded;
 	char	*ptr;
-	char	*env_var;
 	int		i;
-	int		j;
-	int		num_len;
-	char	str_exit_status[20];
-	int		temp;
-	char	tmp;
 
-	expanded = malloc(ft_strlen(input) + 1);
+	expanded = malloc(strlen(input) + 1);
 	ptr = input;
 	i = 0;
 	while (*ptr)
@@ -40,44 +66,11 @@ char	*exp_env_vars(char *input, int exit_status)
 			ptr++;
 			if (*ptr == '?')
 			{
-				temp = exit_status;
-				num_len = 0;
-				if (temp == 0)
-					str_exit_status[num_len++] = '0';
-				else
-				{
-					while (temp > 0)
-					{
-						str_exit_status[num_len++] = (temp % 10) + '0';
-						temp /= 10;
-					}
-					j = -1;
-					while (++j < num_len / 2)
-					{
-						tmp = str_exit_status[j];
-						str_exit_status[j] = str_exit_status[num_len - j - 1];
-						str_exit_status[num_len - j - 1] = tmp;
-					}
-				}
-				str_exit_status[num_len] = '\0';
-				j = -1;
-				while (++j < num_len)
-					expanded[i++] = str_exit_status[j];
 				ptr++;
+				i = expand_exit_status(expanded, i, exit_status);
 			}
 			else
-			{
-				env_var = getenv(ptr);
-				if (env_var)
-				{
-					while (*env_var)
-						expanded[i++] = *env_var++;
-					while (*ptr && *ptr != ' ' && *ptr != '$')
-						ptr++;
-				}
-				else
-					ptr++;
-			}
+				i = expand_env_var(expanded, &ptr, i);
 		}
 		else
 			expanded[i++] = *ptr++;
@@ -110,120 +103,12 @@ void	ft_command(char *cmd, int *exit_status)
 	args[i] = NULL;
 	pid = fork();
 	if (pid == 0)
-	{
-		if (execvp(args[0], args) == -1)
-		{
-			perror("execvp");
-			exit(EXIT_FAILURE);
-		}
-	}
+		execute_and_handle_error(args);
 	else if (pid < 0)
-	{
 		perror ("fork");
-	}
 	else
 	{
 		waitpid(pid, exit_status, 0);
 		*exit_status = WEXITSTATUS(*exit_status);
-	}
-}
-
-/* ************************************************************************** */
-/* Handles the execution of built-in shell commands like cd, exit, echo,      */
-/* pwd, export, unset, and env. Based on the command, it performs the         */
-/* appropriate action, such as changing the directory, printing the current   */
-/* directory, setting/unsetting environment variables, or printing environment*/
-/* variables. The exit status is updated accordingly for each command.        */
-/* ************************************************************************** */
-void	ft_execute(char *cmd, int *exit_status)
-{
-	char		*path;
-	char		*arg;
-	char		*var;
-	char		*value;
-	extern char	**environ;
-	char		cwd[1024];
-	int			i;
-
-	if (ft_strcmp(cmd, "cd") == 0)
-	{
-		path = ft_strtok(NULL, " ");
-		if (path == NULL || chdir(path) == -1)
-		{
-			perror("cd");
-			*exit_status = 1;
-		}
-		else
-		{
-			*exit_status = 0;
-		}
-	}
-	else if (ft_strcmp(cmd, "echo") == 0)
-	{
-		arg = ft_strtok(NULL, " ");
-		while (arg != NULL)
-		{
-			write(STDOUT_FILENO, arg, ft_strlen(arg));
-			write(STDOUT_FILENO, " ", 1);
-			arg = strtok(NULL, " ");
-		}
-		write(STDOUT_FILENO, "\n", 1);
-		*exit_status = 0;
-	}
-	else if (ft_strcmp(cmd, "pwd") == 0)
-	{
-		if (getcwd(cwd, sizeof(cwd)) != NULL)
-		{
-			write(STDOUT_FILENO, cwd, ft_strlen(cwd));
-			write(STDOUT_FILENO, "\n", 1);
-			*exit_status = 0;
-		}
-		else
-		{
-			perror("pwd");
-			*exit_status = 1;
-		}
-	}
-	else if (ft_strcmp(cmd, "export") == 0)
-	{
-		var = ft_strtok(NULL, " ");
-		if (var)
-		{
-			value = ft_strtok(NULL, " ");
-			if (value)
-			{
-				setenv(var, value, 1);
-				*exit_status = 0;
-			}
-			else
-			{
-				write(STDERR_FILENO, "export: invalid argument\n", 25);
-				*exit_status = 1;
-			}
-		}
-	}
-	else if (ft_strcmp(cmd, "unset") == 0)
-	{
-		var = ft_strtok(NULL, " ");
-		if (var)
-		{
-			unsetenv(var);
-			*exit_status = 0;
-		}
-		else
-		{
-			write(STDERR_FILENO, "unset: invalid argument\n", 24);
-			*exit_status = 1;
-		}
-	}
-	else if (ft_strcmp(cmd, "env") == 0)
-	{
-		i = -1;
-		while (environ[++i] != NULL)
-		{
-			write(STDOUT_FILENO, environ[i], ft_strlen(environ[i]));
-			write(STDOUT_FILENO, "\n", 1);
-		}
-		*exit_status = 0;
 	}
 }
