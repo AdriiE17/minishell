@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 19:39:05 by victor            #+#    #+#             */
-/*   Updated: 2024/12/02 17:20:43 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/02 21:31:15 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,8 +83,17 @@ int	print_version(int argc, char *argv[])
 /* ************************************************************************** */
 char	*handle_prompt(char *prompt, char *env[])
 {
+	char	*line;
+
+	write(STDOUT_FILENO, "\r", 1);
 	construct_prompt(prompt, env);
-	return (readline(prompt));
+	g_signal_received = 0;
+	line = readline(prompt);
+	if (line != NULL && isatty(STDIN_FILENO))
+	{
+		rl_redisplay();
+	}
+	return (line);
 }
 
 /* ************************************************************************** */

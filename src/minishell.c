@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:30:57 by victor            #+#    #+#             */
-/*   Updated: 2024/12/02 19:53:22 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/02 21:34:39 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,6 @@ void	signal_handler(int sig)
 			rl_on_new_line();
 			rl_replace_line("", 0);
 			rl_redisplay();
-		}
-		else
-		{
-			printf("Ctrl+C detectado ejecutando un comando bloqueante\n");
 		}
 		g_signal_received = SIGINT;
 	}
@@ -71,9 +67,7 @@ int	main(int argc, char *argv[], char *env[])
 	while (1)
 	{
 		if (g_signal_received)
-		{
 			g_signal_received = 0;
-		}
 		line = handle_prompt(prompt, env);
 		if (line == NULL)
 		{
