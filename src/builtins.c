@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/26 18:34:47 by victor            #+#    #+#             */
-/*   Updated: 2024/11/27 12:08:55 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/03 15:58:47 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,9 @@
 /* ************************************************************************** */
 int	ft_is_builtin(char *cmd)
 {
-	if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "cd") == 0
-		|| strcmp(cmd, "pwd") == 0 || strcmp(cmd, "export") == 0
-		|| strcmp(cmd, "unset") == 0 || strcmp(cmd, "env") == 0)
+	if (ft_strcmp(cmd, "echo") == 0 || ft_strcmp(cmd, "cd") == 0
+		|| ft_strcmp(cmd, "pwd") == 0 || ft_strcmp(cmd, "export") == 0
+		|| ft_strcmp(cmd, "unset") == 0 || ft_strcmp(cmd, "env") == 0)
 		return (1);
 	return (0);
 }

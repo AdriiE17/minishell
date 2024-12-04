@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/12/03 12:21:22 by vberdugo         ###   ########.fr       */
+/*   Updated: 2024/12/04 12:23:40 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -23,6 +23,8 @@
 /* write, access, open, read, close, unlink, execve, dup, dup2, pipe, isatty */
 /* ttyname, ttyslot, getcwd, chdir */
 # include <unistd.h>
+/* open, O_WRONLY, O_CREAT, O_APPEND, O_TRUNC */
+# include <fcntl.h>
 /* fork, wait, waitpid, wait3, wait4 */
 # include <sys/types.h>
 # include <sys/wait.h>
@@ -79,5 +81,7 @@ void	configure_terminal(void);
 int		initialize_shell(int argc, char *argv[]);
 int		handle_exit(char *line, int exit_status);
 void	process_line(char *line, int *exit_status);
+/* redirection */
+void	handle_redirections(char **args, int *exit_status);
 
 #endif

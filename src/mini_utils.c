@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 19:39:05 by victor            #+#    #+#             */
-/*   Updated: 2024/12/02 21:31:15 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/03 16:05:01 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,13 +52,13 @@ void	construct_prompt(char *prompt, char *env[])
 	if (!getcwd(cwd, sizeof(cwd)))
 	{
 		perror("getcwd");
-		strcpy(prompt, "prompt_error$ ");
+		ft_strcpy(prompt, "prompt_error$ ");
 		return ;
 	}
 	ft_strcpy(prompt, username);
 	ft_strcat(prompt, "@");
 	ft_strcat(prompt, hostname);
-	ft_strcat(prompt, " - ");
+	ft_strcat(prompt, ":");
 	ft_strcat(prompt, cwd);
 	ft_strcat(prompt, "$ ");
 }
@@ -107,7 +107,7 @@ void	process_command(char *line, int *exit_status)
 
 	expanded_line = exp_env_vars(line, *exit_status);
 	cmd_token = ft_strtok(expanded_line, ";");
-	while (cmd_token != NULL)
+	while (cmd_token)
 	{
 		execute_pipeline(cmd_token, exit_status);
 		cmd_token = ft_strtok(NULL, ";");

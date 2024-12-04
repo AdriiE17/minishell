@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:18:35 by victor            #+#    #+#             */
-/*   Updated: 2024/12/02 17:56:30 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/03 13:42:16 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ static int	expand_env_var(char *expanded, char **ptr, int i)
 /* is found, it checks if it's followed by a valid environment variable or    */
 /* the special '$?', replacing it with the corresponding value. The function  */
 /* returns a new string with the expanded variables.                          */
-/* ************************************************************************** */
+/* ************************************************************************** 
 char	*exp_env_vars(char *input, int exit_status)
 {
 	char	*expanded;
@@ -77,6 +77,47 @@ char	*exp_env_vars(char *input, int exit_status)
 	}
 	expanded[i] = '\0';
 	return (expanded);
+	}*/
+char	*exp_env_vars(char *input, int exit_status)
+{
+	char	*expanded;
+	char	*ptr;
+	int		i;
+	int		cap;
+
+	cap = 1024;
+	expanded = malloc(cap);
+	if (!expanded)
+		return (NULL);
+	ptr = input;
+	i = 0;
+	while (*ptr)
+	{
+		if (*ptr == '$')
+		{
+			ptr++;
+			if (*ptr == '?')
+			{
+				ptr++;
+				i = expand_exit_status(expanded, i, exit_status);
+			}
+			else
+				i = expand_env_var(expanded, &ptr, i);
+		}
+		else
+		{
+			if (i >= cap - 1)
+			{
+				cap *= 2;
+				expanded = ft_realloc(expanded, cap, cap * 2);
+				if (!expanded)
+					return (NULL);
+			}
+			expanded[i++] = *ptr++;
+		}
+	}
+	expanded[i] = '\0';
+	return (expanded);
 }
 
 /* ************************************************************************** */
@@ -93,6 +134,11 @@ void	ft_command(char *cmd, int *exit_status)
 	char	*token;
 	int		i;
 
+	if (!cmd || *cmd == '\0')
+	{
+		fprintf(stderr, "Error: empty command\n");
+		return ;
+	}
 	i = 0;
 	token = ft_strtok(cmd, " ");
 	while (token != NULL)

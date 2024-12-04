@@ -6,12 +6,17 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 11:31:38 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/03 11:33:46 by vberdugo         ###   ########.fr       */
+/*   Updated: 2024/12/04 12:02:48 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+/* ************************************************************************** */
+/* Handles terminal signals like SIGINT (Ctrl+C) and SIGQUIT (Ctrl+\).        */
+/* SIGINT: Displays a new prompt line and updates the global signal flag.     */
+/* SIGQUIT: Clears the current line and redisplays the prompt.                */
+/* ************************************************************************** */
 void	signal_handler(int sig)
 {
 	if (sig == SIGINT)
@@ -28,11 +33,14 @@ void	signal_handler(int sig)
 	else if (sig == SIGQUIT)
 	{
 		rl_on_new_line();
-		rl_replace_line("", 0);
 		rl_redisplay();
 	}
 }
 
+/* ************************************************************************** */
+/* Configures the terminal settings to disable echoing of control characters  */
+/* like ^C and ^\, ensuring a cleaner shell interface.                        */
+/* ************************************************************************** */
 void	configure_terminal(void)
 {
 	struct termios	term;
@@ -50,6 +58,11 @@ void	configure_terminal(void)
 	}
 }
 
+/* ************************************************************************** */
+/* Initializes the shell by checking the input arguments, configuring the     */
+/* terminal, and setting up signal handlers for SIGINT and SIGQUIT.           */
+/* Returns 1 on success, 0 otherwise.                                         */
+/* ************************************************************************** */
 int	initialize_shell(int argc, char *argv[])
 {
 	if (!print_version(argc, argv))
@@ -60,6 +73,11 @@ int	initialize_shell(int argc, char *argv[])
 	return (1);
 }
 
+/* ************************************************************************** */
+/* Handles the shell's exit procedure. Frees the input line and terminates    */
+/* the shell process with the provided exit status if the input is NULL       */
+/* or matches the "exit" command.                                             */
+/* ************************************************************************** */
 int	handle_exit(char *line, int exit_status)
 {
 	if (line == NULL || ft_strcmp(line, "exit") == 0)
@@ -71,6 +89,11 @@ int	handle_exit(char *line, int exit_status)
 	return (0);
 }
 
+/* ************************************************************************** */
+/* Processes a single line of user input. Adds the line to the command        */
+/* history, passes it to the command processor, and frees the allocated       */
+/* memory for the line.                                                       */
+/* ************************************************************************** */
 void	process_line(char *line, int *exit_status)
 {
 	add_history(line);
