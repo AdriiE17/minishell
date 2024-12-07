@@ -6,12 +6,18 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/06 19:11:28 by victor            #+#    #+#             */
-/*   Updated: 2024/12/06 19:18:55 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/07 12:17:24 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+/* ************************************************************************** */
+/* Removes single quotes from a string. It iterates through the input string  */
+/* and skips over any single quotes that are not preceded by a backslash.     */
+/* The function modifies the original string in place by shifting the         */
+/* characters to remove the quotes.                                           */
+/* ************************************************************************** */
 void	strip_single_quotes(char *str)
 {
 	int	i;
@@ -31,6 +37,14 @@ void	strip_single_quotes(char *str)
 	str[j] = '\0';
 }
 
+/* ************************************************************************** */
+/* Removes double quotes from a string. It processes the input string by      */
+/* skipping over double quotes unless they are escaped with a backslash.      */
+/* It also handles the special case of removing the '$' character only when   */
+/* it is not within double quotes. The function modifies the original string  */
+/* in place by shifting the characters to remove the quotes and the dollar    */
+/* signs.                                                                     */
+/* ************************************************************************** */
 void	strip_double_quotes(char *str)
 {
 	int	i;
@@ -59,6 +73,12 @@ void	strip_double_quotes(char *str)
 	str[j] = '\0';
 }
 
+/* ************************************************************************** */
+/* Removes surrounding quotes from a string, if present. It checks if the     */
+/* first and last characters are matching quotes (either single or double).   */
+/* If they are, it removes the quotes and adjusts the string accordingly.     */
+/* The function modifies the original string in place.                        */
+/* ************************************************************************** */
 void	strip_quotes(char *str)
 {
 	int	len;

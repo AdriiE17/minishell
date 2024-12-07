@@ -6,12 +6,18 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:18:35 by victor            #+#    #+#             */
-/*   Updated: 2024/12/06 22:31:21 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/07 12:14:35 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+/* ************************************************************************** */
+/* Expands the exit status variable into the input string. Converts the       */
+/* integer exit_status to a string and copies it into the expanded string     */
+/* at the correct position. It returns the updated index in the expanded      */
+/* string.                                                                    */
+/* ************************************************************************** */
 static int	expand_exit_status(char *expanded, int i, int exit_status)
 {
 	char	*exit_str;
@@ -25,6 +31,12 @@ static int	expand_exit_status(char *expanded, int i, int exit_status)
 	return (i);
 }
 
+/* ************************************************************************** */
+/* Expands an environment variable found in the input string. It extracts     */
+/* the variable name, looks up its value using getenv(), and copies the       */
+/* value into the expanded string at the correct position. The function       */
+/* returns the updated index in the expanded string.                          */
+/* ************************************************************************** */
 static int	expand_env_var(char *expanded, char **ptr, int i)
 {
 	char	var_name[1024];
@@ -48,101 +60,71 @@ static int	expand_env_var(char *expanded, char **ptr, int i)
 }
 
 /* ************************************************************************** */
-/* Expands environment variables within the input string. If a '$' character  */
-/* is found, it checks if it's followed by a valid environment variable or    */
-/* the special '$?', replacing it with the corresponding value. The function  */
-/* returns a new string with the expanded variables.                          */
+/* Handles special characters like single quotes, double quotes, and the      */
+/* dollar sign in the input string. It toggles single or double quotes and    */
+/* expands environment variables or the exit status if necessary. The         */
+/* function returns 1 if a special character was processed, and 0 if not.     */
 /* ************************************************************************** */
-char	*exp_env_vars(char *input, int exit_status)
+int	handle_special_chars(t_expansion *exp, char **input, int exit)
 {
-	char	*expanded;
-	char	*ptr;
-	int		i;
-	int		cap;
-	int		in_single_quote;
-	int		in_double_quote;
-
-	i = 0;
-	cap = 1024;
-	expanded = malloc(cap);
-	if (!expanded)
-		return (NULL);
-	ptr = input;
-	in_single_quote = 0;
-	in_double_quote = 0;
-	while (*ptr)
+	if (**input == '\'' && !exp->in_double)
 	{
-		if (*ptr == '\'' && !in_double_quote)
+		exp->in_single = !exp->in_single;
+		(*input)++;
+		return (1);
+	}
+	if (**input == '"' && !exp->in_single)
+	{
+		exp->in_double = !exp->in_double;
+		(*input)++;
+		return (1);
+	}
+	if (**input == '$' && !exp->in_single)
+	{
+		(*input)++;
+		if (**input == '?')
 		{
-			in_single_quote = !in_single_quote;
-			ptr++;
-			continue ;
-		}
-		else if (*ptr == '"' && !in_single_quote)
-		{
-			in_double_quote = !in_double_quote;
-			ptr++;
-			continue ;
-		}
-		else if (*ptr == '$' && !in_single_quote)
-		{
-			ptr++;
-			if (*ptr == '?')
-			{
-				ptr++;
-				i = expand_exit_status(expanded, i, exit_status);
-			}
-			else
-				i = expand_env_var(expanded, &ptr, i);
+			(*input)++;
+			exp->index = expand_exit_status(exp->expanded, exp->index, exit);
 		}
 		else
-		{
-			if (i >= cap - 1)
-			{
-				cap *= 2;
-				expanded = ft_realloc(expanded, cap / 2, cap);
-				if (!expanded)
-					return (NULL);
-			}
-			expanded[i++] = *ptr++;
-		}
+			exp->index = expand_env_var(exp->expanded, input, exp->index);
+		return (1);
 	}
-	expanded[i] = '\0';
-	return (expanded);
+	return (0);
 }
 
 /* ************************************************************************** */
-/* Executes a non-built-in command by forking a new process. The command is   */
-/* tokenized into arguments using strtok, and then executed with execvp in    */
-/* the child process. The parent process waits for the child to finish and    */
-/* updates the exit status. If an error occurs during forking or execution,   */
-/* appropriate error messages are displayed.                                  */
+/* Expands environment variables within the input string. It handles special  */
+/* characters, such as quotes and the dollar sign ('$'), expanding them into  */
+/* the corresponding values (e.g., environment variables or exit status).     */
+/* The function returns a new string with the expanded variables.             */
 /* ************************************************************************** */
-void	ft_command(char *cmd, int *exit_status)
+char	*exp_env_vars(char *input, int exit_status)
 {
-	pid_t	pid;
-	char	*args[64];
-	char	*token;
-	int		i;
+	int			cap;
+	t_expansion	exp;
 
-	if (!cmd || *cmd == '\0')
-		return ;
-	i = 0;
-	token = ft_strtok(cmd, " ");
-	while (token != NULL)
+	cap = 1024;
+	exp.expanded = malloc(cap);
+	if (!exp.expanded)
+		return (NULL);
+	exp.ptr = input;
+	exp.index = 0;
+	exp.in_single = 0;
+	exp.in_double = 0;
+	while (*exp.ptr)
 	{
-		args[i++] = token;
-		token = ft_strtok(NULL, " ");
+		if (handle_special_chars(&exp, &exp.ptr, exit_status))
+			continue ;
+		if (exp.index >= cap - 1)
+		{
+			cap *= 2;
+			exp.expanded = ft_realloc(exp.expanded, cap / 2, cap);
+			if (!exp.expanded)
+				return (NULL);
+		}
+		exp.expanded[exp.index++] = *exp.ptr++;
 	}
-	args[i] = NULL;
-	pid = fork();
-	if (pid == 0)
-		execute_and_handle_error(args);
-	else if (pid < 0)
-		perror ("fork");
-	else
-	{
-		waitpid(pid, exit_status, 0);
-		*exit_status = WEXITSTATUS(*exit_status);
-	}
+	return (exp.expanded[exp.index] = '\0', exp.expanded);
 }

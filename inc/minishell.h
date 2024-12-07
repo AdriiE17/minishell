@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/12/06 19:16:16 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/07 11:50:40 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -49,6 +49,14 @@
 # include "../libft/libft.h"
 
 extern volatile sig_atomic_t	g_signal_received;
+typedef struct s_expansion
+{
+	char	*expanded;
+	char	*ptr;
+	int		index;
+	int		in_single;
+	int		in_double;
+}	t_expansion;
 
 void	process_command(char *line, int *exit_status);
 char	*handle_prompt(char *prompt, char *env[]);
@@ -86,6 +94,10 @@ int		initialize_shell(int argc, char *argv[]);
 int		handle_exit(char *line, int exit_status);
 void	process_line(char *line, int *exit_status);
 /* redirection */
+int		handle_arguments(char **args, int exit_status);
+int		handle_input_redirect(char **args, int exit_status, int *i);
+int		handle_output_redirect(char **args, int exit_status, int *i);
+int		handle_here_doc_redirect(char **args, int exit_status, int *i);
 void	handle_redirections(char **args, int *exit_status);
 
 #endif
