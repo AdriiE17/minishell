@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 12:03:53 by victor            #+#    #+#             */
-/*   Updated: 2024/11/27 12:09:20 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/06 11:28:00 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,11 @@ void	ft_execute_echo(int *exit_status)
 	char	*arg;
 
 	arg = ft_strtok(NULL, " ");
-	while (arg != NULL)
+	(void)exit_status;
+	if (arg == NULL)
 	{
-		write(STDOUT_FILENO, arg, ft_strlen(arg));
-		write(STDOUT_FILENO, " ", 1);
-		arg = ft_strtok(NULL, " ");
+		printf("echo ejecutado desde ft_execute_echo\n");
 	}
-	write(STDOUT_FILENO, "\n", 1);
-	*exit_status = 0;
 }
 
 void	ft_execute_export(int *exit_status)

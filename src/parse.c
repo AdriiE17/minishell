@@ -6,49 +6,12 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:18:35 by victor            #+#    #+#             */
-/*   Updated: 2024/12/05 13:49:57 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/06 22:31:21 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-
-/* ************************************************************************** */
-/* Expands environment variables within the input string. If a '$' character  */
-/* is found, it checks if it's followed by a valid environment variable or    */
-/* the special '$?', replacing it with the corresponding value. The function  */
-/* returns a new string with the expanded variables.                          */
-/* ************************************************************************** 
-char	*exp_env_vars(char *input, int exit_status)
-{
-	char	*expanded;
-	char	*ptr;
-	int		i;
-
-	expanded = malloc(strlen(input) + 1);
-	ptr = input;
-	i = 0;
-	while (*ptr)
-	{
-		if (*ptr == '$')
-		{
-			ptr++;
-			if (*ptr == '?')
-			{
-				ptr++;
-				i = expand_exit_status(expanded, i, exit_status);
-			}
-			else
-				i = expand_env_var(expanded, &ptr, i);
-		}
-		else
-			expanded[i++] = *ptr++;
-	}
-	expanded[i] = '\0';
-	return (expanded);
-	}*/
-
-/*
 static int	expand_exit_status(char *expanded, int i, int exit_status)
 {
 	char	*exit_str;
@@ -64,137 +27,89 @@ static int	expand_exit_status(char *expanded, int i, int exit_status)
 
 static int	expand_env_var(char *expanded, char **ptr, int i)
 {
-	char	*env_var;
+	char	var_name[1024];
+	int		j;
+	char	*env_value;
 
-	env_var = getenv(*ptr);
-	if (env_var)
+	j = 0;
+	while (**ptr && (ft_isalnum(**ptr) || **ptr == '_'))
 	{
-		while (*env_var)
-			expanded[i++] = *env_var++;
-		while (**ptr && **ptr != ' ' && **ptr != '$')
-			(*ptr)++;
-	}
-	else
-	{
+		var_name[j++] = **ptr;
 		(*ptr)++;
+	}
+	var_name[j] = '\0';
+	env_value = getenv(var_name);
+	if (env_value)
+	{
+		while (*env_value)
+			expanded[i++] = *env_value++;
 	}
 	return (i);
 }
 
-void strip_single_quotes(char *str)
+/* ************************************************************************** */
+/* Expands environment variables within the input string. If a '$' character  */
+/* is found, it checks if it's followed by a valid environment variable or    */
+/* the special '$?', replacing it with the corresponding value. The function  */
+/* returns a new string with the expanded variables.                          */
+/* ************************************************************************** */
+char	*exp_env_vars(char *input, int exit_status)
 {
-    int i = 0, j = 0;
+	char	*expanded;
+	char	*ptr;
+	int		i;
+	int		cap;
+	int		in_single_quote;
+	int		in_double_quote;
 
-    while (str[i])
-    {
-        if (str[i] == '\'' && (i == 0 || str[i - 1] != '\\'))
-        {
-            i++;
-            continue;
-        }
-        str[j++] = str[i++];
-    }
-    str[j] = '\0';
+	i = 0;
+	cap = 1024;
+	expanded = malloc(cap);
+	if (!expanded)
+		return (NULL);
+	ptr = input;
+	in_single_quote = 0;
+	in_double_quote = 0;
+	while (*ptr)
+	{
+		if (*ptr == '\'' && !in_double_quote)
+		{
+			in_single_quote = !in_single_quote;
+			ptr++;
+			continue ;
+		}
+		else if (*ptr == '"' && !in_single_quote)
+		{
+			in_double_quote = !in_double_quote;
+			ptr++;
+			continue ;
+		}
+		else if (*ptr == '$' && !in_single_quote)
+		{
+			ptr++;
+			if (*ptr == '?')
+			{
+				ptr++;
+				i = expand_exit_status(expanded, i, exit_status);
+			}
+			else
+				i = expand_env_var(expanded, &ptr, i);
+		}
+		else
+		{
+			if (i >= cap - 1)
+			{
+				cap *= 2;
+				expanded = ft_realloc(expanded, cap / 2, cap);
+				if (!expanded)
+					return (NULL);
+			}
+			expanded[i++] = *ptr++;
+		}
+	}
+	expanded[i] = '\0';
+	return (expanded);
 }
-
-void strip_double_quotes(char *str)
-{
-    int i = 0, j = 0;
-    int in_dollar = 0;
-
-    while (str[i])
-    {
-        if (str[i] == '"' && (i == 0 || str[i - 1] != '\\'))
-        {
-            i++;
-            continue;
-        }
-
-        if (str[i] == '$' && !in_dollar)
-        {
-            in_dollar = 1;
-        }
-        else if (str[i] != '$' && in_dollar)
-        {
-            in_dollar = 0;
-        }
-
-        if (in_dollar || (str[i] != '$'))
-        {
-            str[j++] = str[i++];
-        }
-        else
-        {
-            i++;
-        }
-    }
-
-    str[j] = '\0';
-}
-
-char *exp_env_vars(char *input, int exit_status)
-{
-    char *expanded;
-    char *ptr;
-    int i;
-    int cap = 1024;
-    expanded = malloc(cap);
-    if (!expanded)
-        return (NULL);
-    ptr = input;
-    i = 0;
-    int in_single_quote = 0;
-    int in_double_quote = 0;
-
-    while (*ptr)
-    {
-        if (*ptr == '\'' && !in_double_quote) 
-        {
-            in_single_quote = !in_single_quote; 
-            ptr++;
-            continue;
-        }
-        else if (*ptr == '"' && !in_single_quote) 
-        {
-            in_double_quote = !in_double_quote; 
-            ptr++;
-            continue;
-        }
-        else if (*ptr == '$' && !in_single_quote)  
-        {
-            ptr++;
-            if (*ptr == '?')
-            {
-                ptr++;
-                i = expand_exit_status(expanded, i, exit_status);
-            }
-            else
-                i = expand_env_var(expanded, &ptr, i);
-        }
-        else
-        {
-            if (*ptr == '>' || *ptr == '<' || *ptr == '|')
-            {
-                if (in_single_quote || in_double_quote)
-                {
-                    expanded[i++] = *ptr++;
-                    continue;
-                }
-            }
-            if (i >= cap - 1)
-            {
-                cap *= 2;
-                expanded = ft_realloc(expanded, cap, cap * 2);
-                if (!expanded)
-                    return (NULL);
-            }
-            expanded[i++] = *ptr++;
-        }
-    }
-    expanded[i] = '\0';
-    return (expanded);
-}
-*/
 
 /* ************************************************************************** */
 /* Executes a non-built-in command by forking a new process. The command is   */
@@ -211,10 +126,7 @@ void	ft_command(char *cmd, int *exit_status)
 	int		i;
 
 	if (!cmd || *cmd == '\0')
-	{
-		fprintf(stderr, "Error: empty command\n");
 		return ;
-	}
 	i = 0;
 	token = ft_strtok(cmd, " ");
 	while (token != NULL)

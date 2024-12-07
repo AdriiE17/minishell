@@ -6,7 +6,7 @@
 #    By: victor <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 10:39:30 by victor            #+#    #+#              #
-#    Updated: 2024/12/04 15:44:12 by vberdugo         ###   ########.fr        #
+#    Updated: 2024/12/06 19:12:17 by victor           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,8 @@ NAME = minishell
 
 # List all your source files here
 SRCS = src/minishell.c src/parse.c src/pipes.c src/built_utils.c src/builtins.c \
-	   src/pipes_utils.c src/mini_utils.c src/signals.c src/redirection.c
+	   src/pipes_utils.c src/mini_utils.c src/signals.c src/redirection.c \
+	   src/parse_utils.c
 
 # Set the object directory
 OBJ_DIR = ./obj

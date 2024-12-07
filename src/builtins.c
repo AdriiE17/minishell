@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/26 18:34:47 by victor            #+#    #+#             */
-/*   Updated: 2024/12/03 15:58:47 by vberdugo         ###   ########.fr       */
+/*   Updated: 2024/12/06 11:27:02 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,11 +54,9 @@ void	ft_execute_cd(int *exit_status)
 	char	*path;
 
 	path = ft_strtok(NULL, " ");
-	if (path == NULL || chdir(path) == -1)
+	(void)exit_status;
+	if (path == NULL)
 	{
-		perror("cd");
-		*exit_status = 1;
+		printf("cd ejecutado desde ft_execute_cd\n");
 	}
-	else
-		*exit_status = 0;
 }

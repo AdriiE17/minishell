@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/12/05 12:21:26 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/06 19:16:16 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -54,9 +54,13 @@ void	process_command(char *line, int *exit_status);
 char	*handle_prompt(char *prompt, char *env[]);
 int		print_version(int argc, char *argv[]);
 void	ft_command(char *cmd, int *exit_status);
-char	*exp_env_vars(char *input, int exit_status);
 char	**split_args(const char *cmd);
 void	construct_prompt(char *prompt, char *env[]);
+/* parse */
+char	*exp_env_vars(char *input, int exit_status);
+void	strip_single_quotes(char *str);
+void	strip_double_quotes(char *str);
+void	strip_quotes(char *str);
 /* built-ins */
 int		ft_is_builtin(char *cmd);
 void	ft_exec_builtin(char *cmd, int *exit_status);
