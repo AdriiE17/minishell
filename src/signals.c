@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 11:31:38 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/07 12:35:52 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/08 16:31:08 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,10 +80,27 @@ int	initialize_shell(int argc, char *argv[])
 /* ************************************************************************** */
 int	handle_exit(char *line, int exit_status)
 {
-	if (line == NULL || ft_strcmp(line, "exit") == 0)
+	char	*token;
+	int		exit_code;
+
+	if (!line)
 	{
 		printf("exit\n");
-		free(line);
+		exit(exit_status);
+	}
+	token = ft_strtok(line, " ");
+	if (token && ft_strcmp(token, "exit") == 0)
+	{
+		token = ft_strtok(NULL, " ");
+		if (token)
+		{
+			exit_code = ft_atoi(token);
+			if (exit_code < 0 || exit_code > 255)
+				return (free(line), 1);
+			printf("exit\n");
+			exit(exit_code);
+		}
+		printf("exit\n");
 		exit(exit_status);
 	}
 	return (0);
