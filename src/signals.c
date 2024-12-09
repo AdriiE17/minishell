@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 11:31:38 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/08 16:31:08 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/09 11:59:14 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,30 +80,22 @@ int	initialize_shell(int argc, char *argv[])
 /* ************************************************************************** */
 int	handle_exit(char *line, int exit_status)
 {
-	char	*token;
-	int		exit_code;
+	char	*arg;
+	int		new_status;
 
-	if (!line)
+	if (line == NULL || strncmp(line, "exit", 4) != 0)
+		return (exit_status);
+	arg = line + 4;
+	while (*arg == ' ')
+		arg++;
+	if (*arg != '\0')
 	{
-		printf("exit\n");
-		exit(exit_status);
+		new_status = ft_atoi(arg);
+		if (new_status == 0 && strcmp(arg, "0") != 0)
+			return (exit_status);
+		exit(new_status);
 	}
-	token = ft_strtok(line, " ");
-	if (token && ft_strcmp(token, "exit") == 0)
-	{
-		token = ft_strtok(NULL, " ");
-		if (token)
-		{
-			exit_code = ft_atoi(token);
-			if (exit_code < 0 || exit_code > 255)
-				return (free(line), 1);
-			printf("exit\n");
-			exit(exit_code);
-		}
-		printf("exit\n");
-		exit(exit_status);
-	}
-	return (0);
+	exit(exit_status);
 }
 
 /* ************************************************************************** */

@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 19:39:05 by victor            #+#    #+#             */
-/*   Updated: 2024/12/06 17:49:57 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/09 11:58:22 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,11 @@ char	*handle_prompt(char *prompt, char *env[])
 	construct_prompt(prompt, env);
 	g_signal_received = 0;
 	line = readline(prompt);
+	if (line == NULL)
+	{
+		printf("exit\n");
+		exit(0);
+	}
 	if (line != NULL && isatty(STDIN_FILENO))
 	{
 		rl_redisplay();

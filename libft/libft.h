@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/15 12:20:41 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/11/27 16:20:53 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/09 10:34:10 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,5 +90,6 @@ char	*ft_strcat(char *dest, const char *src);
 char	*ft_strtok(char *str, const char *delim);
 void	*ft_realloc(void *ptr, size_t old_size, size_t new_size);
 char	*ft_strsep(char **stringp, const char *delim);
+int		ft_isnumber(const char *str);
 
 #endif
