@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 19:39:05 by victor            #+#    #+#             */
-/*   Updated: 2024/12/09 11:58:22 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/10 10:29:50 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,21 +39,23 @@ char	*find_env_var(char *name, char *env[])
 /* ************************************************************************** */
 void	construct_prompt(char *prompt, char *env[])
 {
+	char	*home;
 	char	*username;
-	char	*hostname;
+	char	hostname[HOST_NAME_MAX];
 	char	cwd[PATH_MAX];
 
 	username = find_env_var("USER", env);
-	hostname = find_env_var("HOSTNAME", env);
 	if (!username)
 		username = "user";
-	if (!hostname)
-		hostname = "localhost";
+	if (gethostname(hostname, HOST_NAME_MAX) != 0)
+		ft_strcpy(hostname, "localhost");
 	if (!getcwd(cwd, sizeof(cwd)))
-	{
-		perror("getcwd");
-		ft_strcpy(prompt, "prompt_error$ ");
 		return ;
+	home = find_env_var("HOME", env);
+	if (home && ft_strncmp(cwd, home, ft_strlen(home)) == 0)
+	{
+		ft_strcpy(cwd, "~");
+		ft_strcat(cwd, cwd + ft_strlen(home));
 	}
 	ft_strcpy(prompt, username);
 	ft_strcat(prompt, "@");
