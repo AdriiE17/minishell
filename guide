@@ -1,0 +1,30 @@
+$| ls
+bash: syntax error near unexpected token `|'
+
+
+main
+└─> print_version
+└─> initialize_shell
+└─> while(1)
+   ├─> handle_prompt
+   │   ├─> construct_prompt
+   │   └─> readline(prompt)
+   ├─> handle_exit
+   └─> process_line
+       ├─> add_history
+       ├─> process_command
+       │   ├─> exp_env_vars
+       │   │   ├─> handle_special_chars
+       │   │   ├─> expand_variable
+       │   │   └─> expand_exit_status
+       │   ├─> split_args
+       │   ├─> execute_pipeline
+       │   │   ├─> fork
+       │   │   └─> handle_child
+       │   │       ├─> split_args
+       │   │       ├─> handle_pipe_redirection
+       │   │       ├─> execute_and_handle_error
+       │   │       ├─> handle_builtin
+       │   │       ├─> handle_signal
+       │   │       └─> execve
+       └─> free(line)

@@ -6,7 +6,7 @@
 #    By: victor <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 10:39:30 by victor            #+#    #+#              #
-#    Updated: 2024/12/07 11:50:36 by victor           ###   ########.fr        #
+#    Updated: 2024/12/11 17:19:42 by victor           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME = minishell
 # List all your source files here
 SRCS = src/minishell.c src/parse.c src/pipes.c src/built_utils.c src/builtins.c \
 	   src/pipes_utils.c src/mini_utils.c src/signals.c src/redirection.c \
-	   src/parse_utils.c src/redirect_utils.c
+	   src/redirect_utils.c
 
 # Set the object directory
 OBJ_DIR = ./obj
@@ -27,7 +27,7 @@ INCLUDE = inc/minishell.h libft/libft.h
 
 # Compiler settings
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -I inc #-fsanitize=address -fsanitize=undefined -fsanitize=leak -g
+CFLAGS = -Wall -Wextra -Werror -I inc -fsanitize=address -fsanitize=undefined -fsanitize=leak -g
 
 # Linker flags (add any required libraries here)
 LDFLAGS = -lcurses -ltermcap -lreadline -lhistory -lncurses

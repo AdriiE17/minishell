@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:18:35 by victor            #+#    #+#             */
-/*   Updated: 2024/12/09 10:22:48 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/11 20:25:20 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,7 @@ int	handle_special_chars(t_expansion *exp, char **input, int exit)
 /* characters, such as quotes and the dollar sign ('$'), expanding them into  */
 /* the corresponding values (e.g., environment variables or exit status).     */
 /* The function returns a new string with the expanded variables.             */
-/* ************************************************************************** */
+/* ************************************************************************** *
 char	*exp_env_vars(char *input, int exit_status)
 {
 	int			cap;
@@ -115,6 +115,43 @@ char	*exp_env_vars(char *input, int exit_status)
 	exp.in_double = 0;
 	while (*exp.ptr)
 	{
+		if (handle_special_chars(&exp, &exp.ptr, exit_status))
+			continue ;
+		if (exp.index >= cap - 1)
+		{
+			cap *= 2;
+			exp.expanded = ft_realloc(exp.expanded, cap / 2, cap);
+			if (!exp.expanded)
+				return (NULL);
+		}
+		exp.expanded[exp.index++] = *exp.ptr++;
+	}
+	return (exp.expanded[exp.index] = '\0', exp.expanded);
+}*/
+char	*exp_env_vars(char *input, int exit_status)
+{
+	int			cap;
+	t_expansion	exp;
+
+	cap = 1024;
+	exp.expanded = malloc(cap);
+	if (!exp.expanded)
+		return (NULL);
+	exp.ptr = input;
+	exp.index = 0;
+	exp.in_single = 0;
+	exp.in_double = 0;
+	while (*exp.ptr)
+	{
+		if (*exp.ptr == '\'' || *exp.ptr == '"')
+		{
+			if (*exp.ptr == '\'' && !exp.in_double)
+				exp.in_single = !exp.in_single;
+			else if (*exp.ptr == '"' && !exp.in_single)
+				exp.in_double = !exp.in_single;
+			exp.expanded[exp.index++] = *exp.ptr++;
+			continue ;
+		}
 		if (handle_special_chars(&exp, &exp.ptr, exit_status))
 			continue ;
 		if (exp.index >= cap - 1)

@@ -6,37 +6,36 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 16:19:43 by victor            #+#    #+#             */
-/*   Updated: 2024/11/27 17:34:57 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/11 16:38:34 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-char	*ft_strsep(char **stringp, const char *delim)
+char	*ft_strsep(char **stringp, const char *delim, int *in_q, char *q_char)
 {
-	char		*start;
-	char		*end;
-	const char	*d;
+	char	*start;
+	char	*p;
 
 	start = *stringp;
-	if (*stringp == NULL)
+	p = *stringp;
+	if (!start)
 		return (NULL);
-	end = *stringp;
-	while (*end)
+	while (*p)
 	{
-		d = delim;
-		while (*d)
+		if ((*p == '"' || *p == '\'') && (*in_q == 0 || *p == *q_char))
 		{
-			if (*end == *d)
-			{
-				*end = '\0';
-				*stringp = end + 1;
-				return (start);
-			}
-			d++;
+			*in_q = !(*in_q);
+			if (*in_q)
+				*q_char = *p;
+			else
+				*q_char = '\0';
 		}
-		end++;
+		else if (!*in_q && ft_strchr(delim, *p))
+		{
+			return (*p++ = '\0', *stringp = p, start);
+		}
+		p++;
 	}
-	*stringp = NULL;
-	return (start);
+	return (*stringp = NULL, start);
 }

@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/12/09 10:49:21 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/11 20:10:35 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -85,8 +85,10 @@ void	handle_fork_error(void);
 void	execute_and_handle_error(char **args);
 void	close_pipe(int pipefd);
 void	execute_pipeline(char *cmd, int *exit_status);
-void	handle_child(char *sub_t, int prev_fd, int pipefds[2], int *exit_s);
-void	handle_pipe_redirection(int prev_pipefd, int pipefds[2]);
+//void	handle_child(char *sub_t, int prev_fd, int pipefds[2], int *exit_s);
+void    handle_child(char *sub_t, int prev_fd, int pipefds[2], int has_next_cmd, int *exit_s);
+//void	handle_pipe_redirection(int prev_pipefd, int pipefds[2]);
+void    handle_pipe_redirection(int prev_pipefd, int pipefds[2], int has_next_cmd);
 /* signals */
 void	signal_handler(int sig);
 void	configure_terminal(void);
