@@ -6,30 +6,33 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:56:07 by victor            #+#    #+#             */
-/*   Updated: 2024/12/11 16:59:37 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/12 20:12:13 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /* ************************************************************************** */
-/* Counts the number of pipe ('|') characters in a string and returns the     */
-/* total number of commands in the pipeline.                                  */
+/*																			  */
+/*                                  										  */
 /* ************************************************************************** */
-int	count_pipes(char *str)
+t_expan	init_expan(const char *cmd)
 {
-	int	count;
+	t_expan	exp;
 
-	count = 0;
-	while (*str)
+	exp.in_single = 0;
+	exp.in_double = 0;
+	exp.ind = 0;
+	exp.quote_char = '\0';
+	exp.cmd_copy = strdup(cmd);
+	if (!exp.cmd_copy)
 	{
-		if (*str == '|')
-		{
-			count++;
-		}
-		str++;
+		exp.arg = NULL;
+		return (exp);
 	}
-	return (count + 1);
+	exp.arg = NULL;
+	exp.ptr = exp.cmd_copy;
+	return (exp);
 }
 
 /* ************************************************************************** */

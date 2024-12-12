@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 19:39:05 by victor            #+#    #+#             */
-/*   Updated: 2024/12/11 17:01:53 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/12 18:23:23 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void	process_command(char *line, int *exit_status)
 	char	*expanded_line;
 	char	*cmd_token;
 
-	expanded_line = exp_env_vars(line, *exit_status);
+	expanded_line = expand_all_env_vars(line, *exit_status);
 	cmd_token = ft_strtok(expanded_line, ";");
 	while (cmd_token)
 	{

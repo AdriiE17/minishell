@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:18:35 by victor            #+#    #+#             */
-/*   Updated: 2024/12/11 20:25:20 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/12 20:09:45 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ static int	expand_exit_status(char *expanded, int i, int exit_status)
 /* value into the expanded string at the correct position. The function       */
 /* returns the updated index in the expanded string.                          */
 /* ************************************************************************** */
-static int	expand_env_var(char *expanded, char **ptr, int i)
+static int	exp_single_env_var(char *expanded, char **ptr, int i)
 {
 	char	var_name[1024];
 	int		j;
@@ -65,7 +65,7 @@ static int	expand_env_var(char *expanded, char **ptr, int i)
 /* expands environment variables or the exit status if necessary. The         */
 /* function returns 1 if a special character was processed, and 0 if not.     */
 /* ************************************************************************** */
-int	handle_special_chars(t_expansion *exp, char **input, int exit)
+int	handle_special_chars2(t_expan *exp, char **input, int exit)
 {
 	if (**input == '\'' && !exp->in_double)
 	{
@@ -85,12 +85,28 @@ int	handle_special_chars(t_expansion *exp, char **input, int exit)
 		if (**input == '?')
 		{
 			(*input)++;
-			exp->index = expand_exit_status(exp->expanded, exp->index, exit);
+			exp->ind = expand_exit_status(exp->expanded, exp->ind, exit);
 		}
 		else
-			exp->index = expand_env_var(exp->expanded, input, exp->index);
+			exp->ind = exp_single_env_var(exp->expanded, input, exp->ind);
 		return (1);
 	}
+	return (0);
+}
+
+static int	handle_special_chars(t_expan *exp, char **input, int exit)
+{
+	if (*(*input) == '\'' || *(*input) == '"')
+	{
+		if (*(*input) == '\'' && !exp->in_double)
+			exp->in_single = !exp->in_single;
+		else if (*(*input) == '"' && !exp->in_single)
+			exp->in_double = !exp->in_single;
+		exp->expanded[exp->ind++] = *(*input)++;
+		return (1);
+	}
+	if (handle_special_chars2(exp, input, exit))
+		return (1);
 	return (0);
 }
 
@@ -99,69 +115,32 @@ int	handle_special_chars(t_expansion *exp, char **input, int exit)
 /* characters, such as quotes and the dollar sign ('$'), expanding them into  */
 /* the corresponding values (e.g., environment variables or exit status).     */
 /* The function returns a new string with the expanded variables.             */
-/* ************************************************************************** *
-char	*exp_env_vars(char *input, int exit_status)
+/* ************************************************************************** */
+char	*expand_all_env_vars(char *input, int exit_status)
 {
 	int			cap;
-	t_expansion	exp;
+	t_expan		exp;
 
 	cap = 1024;
 	exp.expanded = malloc(cap);
 	if (!exp.expanded)
 		return (NULL);
 	exp.ptr = input;
-	exp.index = 0;
+	exp.ind = 0;
 	exp.in_single = 0;
 	exp.in_double = 0;
 	while (*exp.ptr)
 	{
 		if (handle_special_chars(&exp, &exp.ptr, exit_status))
 			continue ;
-		if (exp.index >= cap - 1)
+		if (exp.ind >= cap - 1)
 		{
 			cap *= 2;
 			exp.expanded = ft_realloc(exp.expanded, cap / 2, cap);
 			if (!exp.expanded)
 				return (NULL);
 		}
-		exp.expanded[exp.index++] = *exp.ptr++;
+		exp.expanded[exp.ind++] = *exp.ptr++;
 	}
-	return (exp.expanded[exp.index] = '\0', exp.expanded);
-}*/
-char	*exp_env_vars(char *input, int exit_status)
-{
-	int			cap;
-	t_expansion	exp;
-
-	cap = 1024;
-	exp.expanded = malloc(cap);
-	if (!exp.expanded)
-		return (NULL);
-	exp.ptr = input;
-	exp.index = 0;
-	exp.in_single = 0;
-	exp.in_double = 0;
-	while (*exp.ptr)
-	{
-		if (*exp.ptr == '\'' || *exp.ptr == '"')
-		{
-			if (*exp.ptr == '\'' && !exp.in_double)
-				exp.in_single = !exp.in_single;
-			else if (*exp.ptr == '"' && !exp.in_single)
-				exp.in_double = !exp.in_single;
-			exp.expanded[exp.index++] = *exp.ptr++;
-			continue ;
-		}
-		if (handle_special_chars(&exp, &exp.ptr, exit_status))
-			continue ;
-		if (exp.index >= cap - 1)
-		{
-			cap *= 2;
-			exp.expanded = ft_realloc(exp.expanded, cap / 2, cap);
-			if (!exp.expanded)
-				return (NULL);
-		}
-		exp.expanded[exp.index++] = *exp.ptr++;
-	}
-	return (exp.expanded[exp.index] = '\0', exp.expanded);
+	return (exp.expanded[exp.ind] = '\0', exp.expanded);
 }

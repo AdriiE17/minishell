@@ -1,5 +1,7 @@
 $| ls
 bash: syntax error near unexpected token `|'
+$||
+bash: syntax error near unexpected token `||'
 
 
 main
@@ -28,3 +30,29 @@ main
        │   │       ├─> handle_signal
        │   │       └─> execve
        └─> free(line)
+
+
+# Prueba 1: Redirección y comillas
+echo "hola mundo" > test_file
+ls  # Esperado: test_file
+cat test_file  # Esperado: hola mundo
+
+# Prueba 2: Comillas y contenido especial
+echo 'texto "entre comillas"' > quoted_file
+ls  # Esperado: quoted_file
+cat quoted_file  # Esperado: texto "entre comillas"
+
+# Prueba 3: Tuberías y redirección combinadas
+echo "texto con tuberías y > redirección" | cat > pipe_file
+ls  # Esperado: pipe_file
+cat pipe_file  # Esperado: texto con tuberías y > redirección
+
+# Prueba 4: Redirección inválida con comillas
+echo hola > "\"weird_file\""
+ls  # Esperado: "weird_file"
+cat "\"weird_file\""  # Esperado: hola
+
+# Prueba 5: Caracteres especiales en nombres de archivo
+echo "contenido especial" > "file with spaces.txt"
+ls  # Esperado: file with spaces.txt
+cat "file with spaces.txt"  # Esperado: contenido especial

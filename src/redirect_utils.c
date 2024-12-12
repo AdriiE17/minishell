@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 11:28:43 by victor            #+#    #+#             */
-/*   Updated: 2024/12/07 12:34:13 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/12 18:45:46 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ int	handle_arguments(char **args, int exit_status)
 	i = 0;
 	while (args[i])
 	{
-		expanded = exp_env_vars(args[i], exit_status);
+		expanded = expand_all_env_vars(args[i], exit_status);
 		if (!expanded)
 		{
 			fprintf(stderr, "Error: failed to expand variables\n");
@@ -73,9 +73,12 @@ int	handle_here_doc_input(int pipe_fd[2], char *delimiter)
 /* ************************************************************************** */
 int	handle_input_redirect(char **args, int exit_status, int *i)
 {
-	int	fd_in;
+	char	*clean_filename;
+	int		fd_in;
 
-	fd_in = open(args[*i + 1], O_RDONLY);
+	clean_filename = remove_quotes(args[*i + 1]);
+	fd_in = open(clean_filename, O_RDONLY);
+	free(clean_filename);
 	if (fd_in == -1)
 	{
 		perror(args[*i + 1]);
@@ -102,25 +105,24 @@ int	handle_input_redirect(char **args, int exit_status, int *i)
 /* ************************************************************************** */
 int	handle_output_redirect(char **args, int exit_status, int *i)
 {
-	int	fd_out;
-	int	flags;
+	char	*clean_filename;
+	int		fd_out;
+	int		flags;
 
+	clean_filename = remove_quotes(args[*i + 1]);
+	args[*i - 1] = remove_quotes(args[*i - 1]);
+	if (!clean_filename)
+		return (1);
 	if (strcmp(args[*i], ">>") == 0)
 		flags = O_WRONLY | O_CREAT | O_APPEND;
 	else
 		flags = O_WRONLY | O_CREAT | O_TRUNC;
-	fd_out = open(args[*i + 1], flags, 0644);
+	fd_out = open(clean_filename, flags, 0644);
+	free(clean_filename);
 	if (fd_out == -1)
-	{
-		perror(args[*i + 1]);
-		return (1);
-	}
+		return (perror(args[*i + 1]), 1);
 	if (dup2(fd_out, STDOUT_FILENO) == -1)
-	{
-		perror("dup2");
-		close(fd_out);
-		return (1);
-	}
+		return (perror("dup2"), close(fd_out), 1);
 	close(fd_out);
 	args[*i] = NULL;
 	args[*i + 1] = NULL;
@@ -134,30 +136,31 @@ int	handle_output_redirect(char **args, int exit_status, int *i)
 /* is encountered and writes the input to the pipe. The parent process waits  */
 /* for the child to finish and then redirects the input stream to the pipe.   */
 /* ************************************************************************** */
-int	handle_here_doc_redirect(char **args, int exit_status, int *i)
+int	handle_here_doc_redirect(char **args, int exit, int *i)
 {
-	char	*delimiter;
+	char	*delimite;
 	int		pipe_fd[2];
 	pid_t	pid;
 
-	delimiter = args[*i + 1];
+	delimite = remove_quotes(args[*i + 1]);
 	if (pipe(pipe_fd) == -1)
-		return (perror("pipe"), 1);
+		return (perror("pipe"), free(delimite), 1);
 	pid = fork();
 	if (pid == 0)
 	{
 		close(pipe_fd[0]);
-		handle_here_doc_input(pipe_fd, delimiter);
+		handle_here_doc_input(pipe_fd, delimite);
+		free(delimite);
 	}
 	else if (pid > 0)
 	{
 		close(pipe_fd[1]);
 		if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
-			return (perror("dup2"), close(pipe_fd[0]), 1);
+			return (perror("dup2"), close(pipe_fd[0]), free(delimite), 1);
 		close(pipe_fd[0]);
 		waitpid(pid, NULL, 0);
 	}
 	else
-		return (perror("fork"), 1);
-	return (args[*i] = NULL, args[*i + 1] = NULL, (*i)++, exit_status);
+		return (perror("fork"), free(delimite), 1);
+	return (free(delimite), args[*i] = NULL, args[*i + 1] = NULL, (*i)++, exit);
 }

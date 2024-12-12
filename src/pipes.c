@@ -6,99 +6,56 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 15:38:32 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/11 20:37:05 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/12 21:00:49 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /* ************************************************************************** */
-/* Splits the given command string into tokens (arguments) separated by space */
-/* Allocates memory dynamically for each token and returns an array of tokens */
-/* ************************************************************************** *
-static char	**tokenize_args(char *cmd_copy)
-{
-	int		c;
-	char	**arg;
-	char	*token;
-	char	*ptr;
-	int in_quotes = 0;  
-	char quote_char = '\0'; 
-
-	c = 0;
-	arg = NULL;
-	ptr = cmd_copy;
-	token = ft_strsep(&ptr, " ", &in_quotes, &quote_char);
-	while (token != NULL)
-	{
-		if (*token != '\0')
-		{
-			arg = ft_realloc(arg, sizeof(char *) * c, sizeof(char *) * (c + 1));
-			if (!arg)
-				return (NULL);
-			arg[c++] = ft_strdup(token);
-		}
-		token = ft_strsep(&ptr, " ", &in_quotes, &quote_char);
-	}
-	arg = ft_realloc(arg, sizeof(char *) * c, sizeof(char *) * (c + 1));
-	if (!arg)
-		return (NULL);
-	arg[c] = NULL;
-	return (arg);
-}
-
-* ************************************************************************** */
 /* Duplicates a command string and splits to arguments using tokenize_args.   */
 /* Frees the duplicated command string after tokenization.                    */
 /* ************************************************************************** */
 char	**split_args(const char *cmd)
 {
-	char	*cmd_copy;
-	char	**arg;
-	char	*token;
-	char	*ptr;
-	int		in_quotes;
-	char	quote_char;
-	int		c;
+	t_expan		exp;
+	char		*token;
 
-	in_quotes = 0;
-	quote_char = '\0';
-	c = 0;
-	cmd_copy = strdup(cmd);
-	if (!cmd_copy)
+	exp = init_expan(cmd);
+	if (!exp.cmd_copy)
 		return (NULL);
-	arg = NULL;
-	ptr = cmd_copy;
-	while ((token = ft_strsep(&ptr, " ", &in_quotes, &quote_char)) != NULL)
+	token = ft_strsep(&exp.ptr, " ", &exp.in_single, &exp.quote_char);
+	while (token != NULL)
 	{
 		if (*token != '\0')
 		{
-			arg = ft_realloc(arg, sizeof(char *) * c, sizeof(char *) * (c + 1));
-			if (!arg)
-				return (free(cmd_copy), NULL);
-			arg[c++] = ft_strdup(token);
+			exp.arg = ft_realloc(exp.arg, sizeof(char *) * exp.ind,
+					sizeof(char *) * (exp.ind + 1));
+			if (!exp.arg)
+				return (free(exp.cmd_copy), NULL);
+			exp.arg[exp.ind++] = ft_strdup(token);
 		}
+		token = ft_strsep(&exp.ptr, " ", &exp.in_single, &exp.quote_char);
 	}
-	arg = ft_realloc(arg, sizeof(char *) * c, sizeof(char *) * (c + 1));
-	if (!arg)
-		return (free(cmd_copy), NULL);
-	arg[c] = NULL;
-	free(cmd_copy);
-	return (arg);
+	exp.arg = ft_realloc(exp.arg, sizeof(char *) * exp.ind,
+			sizeof(char *) * (exp.ind + 1));
+	if (!exp.arg)
+		return (free(exp.cmd_copy), NULL);
+	return (exp.arg[exp.ind] = NULL, free(exp.cmd_copy), exp.arg);
 }
 
 /* ************************************************************************** */
 /* Sets up redirections for pipes. Redirects input from the previous pipe and */
 /* output to the current pipe if there are more commands in the pipeline.     */
 /* ************************************************************************** */
-void	handle_pipe_redirection(int pr_pipefd, int pipefds[2], int has_next_cmd)
+void	handle_pipe_redirection(int prev_pipe, int pipefds[2], int next_cmd)
 {
-	if (pr_pipefd != -1)
+	if (prev_pipe != -1)
 	{
-		dup2(pr_pipefd, STDIN_FILENO);
-		close(pr_pipefd);
+		dup2(prev_pipe, STDIN_FILENO);
+		close(prev_pipe);
 	}
-	if (has_next_cmd)
+	if (next_cmd)
 	{
 		dup2(pipefds[1], STDOUT_FILENO);
 	}
@@ -111,12 +68,12 @@ void	handle_pipe_redirection(int pr_pipefd, int pipefds[2], int has_next_cmd)
 /* Sets up pipe redirections, splits the command into arguments, and executes */
 /* built-in commands or external programs.                                    */
 /* ************************************************************************** */
-void	handle_child(char *sub_t, int prev_fd, int pipefds[2], int has_next_cmd, int *exit_s)
+void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s)
 {
 	char	**args;
 
 	args = split_args(sub_t);
-	handle_pipe_redirection(prev_fd, pipefds, has_next_cmd);
+	handle_pipe_redirection(pipe_d->pre_fd, pipe_d->pipefds, pipe_d->has_cmd);
 	handle_redirections(args, exit_s);
 	if (ft_is_builtin(args[0]))
 	{
@@ -132,43 +89,40 @@ void	handle_child(char *sub_t, int prev_fd, int pipefds[2], int has_next_cmd, in
 /* Handles pipe creation, forking processes, and chaining commands through    */
 /* pipes. Waits for all child processes to complete.                          */
 /* ************************************************************************** */
-void	execute_pipeline(char *cmd, int *exit_status)
+void	handle_pipeline(char *cmd, int *exit_status, t_pipe *pip)
 {
-	char	*sub_token;
-	int		pipefds[2];
-	int		prev_pipefd;
 	pid_t	pid;
-	int		in_q;
-	char	q_char;
-	int		has_next_cmd;
 
-	in_q = 0;
-	q_char = '\0';
-	prev_pipefd = -1;
-	sub_token = ft_strsep(&cmd, "|", &in_q, &q_char);
-	while (sub_token != NULL)
+	pip->in_q = 0;
+	pip->q_char = '\0';
+	pip->sub_token = ft_strsep(&cmd, "|", &pip->in_q, &pip->q_char);
+	while (pip->sub_token != NULL)
 	{
-		has_next_cmd = (cmd != NULL && *cmd != '\0');
-		if (pipe(pipefds) == -1)
+		pip->has_cmd = (cmd != NULL && *cmd != '\0');
+		if (pipe(pip->pipefds) == -1)
 			handle_pipe_error();
 		pid = fork();
 		if (pid == 0)
-		{
-			handle_child(sub_token, prev_pipefd, pipefds, has_next_cmd, exit_status);
-		}
+			handle_child(pip->sub_token, pip, exit_status);
 		else if (pid < 0)
-		{
 			handle_fork_error();
-		}
-		close_pipe(prev_pipefd);
-		close(pipefds[1]);
-		prev_pipefd = pipefds[0];
-		if (has_next_cmd)
-			sub_token = ft_strsep(&cmd, "|", &in_q, &q_char);
+		close_pipe(pip->pre_fd);
+		close(pip->pipefds[1]);
+		pip->pre_fd = pip->pipefds[0];
+		if (pip->has_cmd)
+			pip->sub_token = ft_strsep(&cmd, "|", &pip->in_q, &pip->q_char);
 		else
 			break ;
 	}
-	close_pipe(prev_pipefd);
+}
+
+void	execute_pipeline(char *cmd, int *exit_status)
+{
+	t_pipe	pipe;
+
+	pipe.pre_fd = -1;
+	handle_pipeline(cmd, exit_status, &pipe);
+	close_pipe(pipe.pre_fd);
 	while (wait(NULL) > 0)
 		;
 }
