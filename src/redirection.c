@@ -6,37 +6,16 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 12:07:58 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/12 15:45:01 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/15 11:08:51 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char	*remove_quotes(const char *str)
+char	*remove_quotes(char *str)
 {
-	size_t	len;
-	size_t	start;
-	size_t	end;
-	size_t	i;
-	char	*result;
-
-	len = ft_strlen(str);
-	start = 0;
-	end = len - 1;
-	while (str[start] == '"' || str[start] == '\'')
-		start++;
-	while (str[end] == '"' || str[end] == '\'')
-		end--;
-	if (start > end)
-		return (ft_strdup(""));
-	result = malloc(end - start + 2);
-	if (!result)
-		return (NULL);
-	i = 0;
-	while (start <= end)
-		result[i++] = str[start++];
-	result[i] = '\0';
-	return (result);
+	process_string(&str);
+	return (str);
 }
 
 /* ************************************************************************** */
