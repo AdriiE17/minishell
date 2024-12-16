@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/12/15 11:07:57 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/16 13:35:16 by vberdugo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -100,6 +100,7 @@ void	close_pipe(int pipefd);
 void	execute_pipeline(char *cmd, int *exit_status);
 void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s);
 void	handle_pipe_redirection(int prev_pipe, int pipefds[2], int next_cmd);
+int		validate_syntax(const char *cmd, int *exit_status);
 /* signals */
 void	signal_handler(int sig);
 void	configure_terminal(void);
