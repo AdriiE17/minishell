@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 11:31:38 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/09 11:59:14 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/18 20:58:47 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,11 @@ void	signal_handler(int sig)
 	}
 	else if (sig == SIGQUIT)
 	{
-		rl_on_new_line();
-		rl_redisplay();
+		if (isatty(STDIN_FILENO))
+		{
+			tputs(tgetstr("vi", NULL), 1, putchar);
+		}
+		g_signal_received = SIGQUIT;
 	}
 }
 
@@ -107,5 +110,6 @@ void	process_line(char *line, int *exit_status)
 {
 	add_history(line);
 	process_command(line, exit_status);
+	tputs(tgetstr("ve", NULL), 1, putchar);
 	free(line);
 }

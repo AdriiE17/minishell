@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 11:28:43 by victor            #+#    #+#             */
-/*   Updated: 2024/12/16 15:52:43 by vberdugo         ###   ########.fr       */
+/*   Updated: 2024/12/18 21:06:12 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int	handle_arguments(char **args, int exit_status)
 /* Handles input redirection using a pipe and a delimiter. It continuously    */
 /* reads input from the user until the delimiter is entered, writing the      */
 /* input to the pipe. The function exits after closing the pipe.              */
-/* ************************************************************************** */
+/* ************************************************************************** *
 int	handle_here_doc_input(int pipe_fd[2], char *delimiter)
 {
 	char	*line;
@@ -62,6 +62,27 @@ int	handle_here_doc_input(int pipe_fd[2], char *delimiter)
 		write(pipe_fd[1], "\n", 1);
 	}
 	free(line);
+	close(pipe_fd[1]);
+	exit(0);
+	}*/
+int	handle_here_doc_input(int pipe_fd[2], char *delimiter)
+{
+	char	*line;
+
+	while (1)
+	{
+		line = readline("> ");
+		if (!line)
+			break ;
+		if (ft_strcmp(line, delimiter) == 0)
+		{
+			free(line);
+			break ;
+		}
+		write(pipe_fd[1], line, ft_strlen(line));
+		write(pipe_fd[1], "\n", 1);
+		free(line);
+	}
 	close(pipe_fd[1]);
 	exit(0);
 }
