@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 12:07:58 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/15 11:08:51 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/21 21:02:36 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,4 +90,5 @@ void	handle_redirections(char **args, int *exit_status)
 			handle_here_doc_redirection(args, exit_status, &i);
 		i++;
 	}
+	signal(SIGQUIT, signal_handler);
 }

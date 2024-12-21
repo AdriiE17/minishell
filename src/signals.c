@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 11:31:38 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/18 20:58:47 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/21 21:03:17 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,17 @@
 /* ************************************************************************** */
 void	signal_handler(int sig)
 {
-	if (sig == SIGINT)
+	if (sig == SIGQUIT)
+	{
+		if (!isatty(STDIN_FILENO))
+		{
+			write(STDOUT_FILENO, "\n", 1);
+			rl_on_new_line();
+			rl_replace_line("", 0);
+			rl_redisplay();
+		}
+	}
+	else if (sig == SIGINT)
 	{
 		if (isatty(STDIN_FILENO))
 		{
@@ -30,14 +40,7 @@ void	signal_handler(int sig)
 		}
 		g_signal_received = SIGINT;
 	}
-	else if (sig == SIGQUIT)
-	{
-		if (isatty(STDIN_FILENO))
-		{
-			tputs(tgetstr("vi", NULL), 1, putchar);
-		}
-		g_signal_received = SIGQUIT;
-	}
+	signal(SIGQUIT, SIG_IGN);
 }
 
 /* ************************************************************************** */
@@ -72,7 +75,7 @@ int	initialize_shell(int argc, char *argv[])
 		return (0);
 	configure_terminal();
 	signal(SIGINT, signal_handler);
-	signal(SIGQUIT, signal_handler);
+	signal(SIGQUIT, SIG_IGN);
 	return (1);
 }
 
@@ -110,6 +113,5 @@ void	process_line(char *line, int *exit_status)
 {
 	add_history(line);
 	process_command(line, exit_status);
-	tputs(tgetstr("ve", NULL), 1, putchar);
 	free(line);
 }

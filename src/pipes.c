@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 15:38:32 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/16 17:41:13 by vberdugo         ###   ########.fr       */
+/*   Updated: 2024/12/21 20:59:42 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,7 @@ void	execute_pipeline(char *cmd, int *exit_status)
 	pipe.pre_fd = -1;
 	handle_pipeline(cmd, exit_status, &pipe);
 	close_pipe(pipe.pre_fd);
+	signal(SIGQUIT, SIG_IGN);
 	while (wait(NULL) > 0)
 		;
 }
