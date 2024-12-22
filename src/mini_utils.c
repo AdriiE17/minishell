@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 19:39:05 by victor            #+#    #+#             */
-/*   Updated: 2024/12/21 16:56:39 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/22 14:04:06 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,11 +96,9 @@ char	*handle_prompt(char *prompt, char *env[])
 		printf("exit\n");
 		exit(0);
 	}
-	if (line != NULL && isatty(STDIN_FILENO))
-	{
+	if (isatty(STDIN_FILENO))
 		rl_redisplay();
-	}
-	return (line);
+	return (handle_multiline_input(line));
 }
 
 /* ************************************************************************** */

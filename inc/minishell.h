@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/12/16 13:35:16 by vberdugo         ###   ########.fr       */
+/*   Updated: 2024/12/22 13:06:12 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -80,6 +80,8 @@ int		print_version(int argc, char *argv[]);
 void	ft_command(char *cmd, int *exit_status);
 char	**split_args(const char *cmd);
 void	construct_prompt(char *prompt, char *env[]);
+bool	has_unclosed_quotes(const char *line);
+char	*handle_multiline_input(char *initial_line);
 /* parse */
 char	*expand_all_env_vars(char *input, int exit_status);
 /* built-ins */
