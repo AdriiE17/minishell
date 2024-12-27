@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:30:57 by victor            #+#    #+#             */
-/*   Updated: 2024/12/22 13:48:28 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/26 10:52:28 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ int	main(int argc, char *argv[], char *env[])
 			g_signal_received = 0;
 		line = handle_prompt(prompt, env);
 		handle_exit(line, exit_status);
-		process_line(line, &exit_status);
+		process_line(line, &exit_status, env);
 	}
 	return (exit_status);
 }

@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 11:31:38 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/22 13:35:43 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/26 11:07:15 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,9 +109,9 @@ int	handle_exit(char *line, int exit_status)
 /* history, passes it to the command processor, and frees the allocated       */
 /* memory for the line.                                                       */
 /* ************************************************************************** */
-void	process_line(char *line, int *exit_status)
+void	process_line(char *line, int *exit_status, char **env)
 {
 	add_history(line);
-	process_command(line, exit_status);
+	process_command(line, exit_status, env);
 	free(line);
 }

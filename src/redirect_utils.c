@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 11:28:43 by victor            #+#    #+#             */
-/*   Updated: 2024/12/18 21:06:12 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/26 16:11:18 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,12 +94,12 @@ int	handle_here_doc_input(int pipe_fd[2], char *delimiter)
 /* ************************************************************************** */
 int	handle_input_redirect(char **args, int exit_status, int *i)
 {
-	char	*clean_filename;
+	//char	*clean_filename;
 	int		fd_in;
 
-	clean_filename = remove_quotes(args[*i + 1]);
-	fd_in = open(clean_filename, O_RDONLY);
-	free(clean_filename);
+	//clean_filename = remove_quotes(args[*i + 1]);
+	fd_in = open(args[*i + 1], O_RDONLY);
+	//free(clean_filename);
 	if (fd_in == -1)
 	{
 		perror(args[*i + 1]);
@@ -129,7 +129,7 @@ int	handle_output_redirect(char **args, int exit_status, int *i)
 	int		fd_out;
 	int		flags;
 
-	process_string(args);
+	//process_string(args);
 	if (strcmp(args[*i], ">>") == 0)
 		flags = O_WRONLY | O_CREAT | O_APPEND;
 	else
@@ -152,13 +152,23 @@ int	handle_output_redirect(char **args, int exit_status, int *i)
 /* is encountered and writes the input to the pipe. The parent process waits  */
 /* for the child to finish and then redirects the input stream to the pipe.   */
 /* ************************************************************************** */
-int	handle_here_doc_redirect(char **args, int exit, int *i)
+int	handle_here_doc_redirect(char **args, int exit, int *i, char **env)
 {
 	char	*delimite;
 	int		pipe_fd[2];
 	pid_t	pid;
+	char	*command_path;
 
-	delimite = remove_quotes(args[*i + 1]);
+	command_path = find_command_in_path(args[0], env);
+	if (!command_path)
+	{
+		fprintf(stderr, "%s: Command not found\n", args[0]);
+		handle_here_doc_input(pipe_fd, args[*i + 1]);
+		return 1;
+	}
+	free(command_path);
+
+	delimite = args[*i + 1];
 	if (pipe(pipe_fd) == -1)
 		return (perror("pipe"), free(delimite), 1);
 	pid = fork();

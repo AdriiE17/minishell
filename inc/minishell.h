@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/12/22 13:06:12 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/26 14:24:18 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -74,7 +74,7 @@ typedef struct s_pipe
 	char	q_char;
 }	t_pipe;
 
-void	process_command(char *line, int *exit_status);
+void	process_command(char *line, int *exit_status, char **env);
 char	*handle_prompt(char *prompt, char *env[]);
 int		print_version(int argc, char *argv[]);
 void	ft_command(char *cmd, int *exit_status);
@@ -97,26 +97,25 @@ void	ft_execute_pwd(int *exit_status);
 t_expan	init_expan(const char *cmd);
 void	handle_pipe_error(void);
 void	handle_fork_error(void);
-void	execute_and_handle_error(char **args);
+void	execute_and_handle_error(char **args, char **env);
 void	close_pipe(int pipefd);
-void	execute_pipeline(char *cmd, int *exit_status);
-void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s);
+void	execute_pipeline(char *cmd, int *exit_status, char **env);
+void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s, char **env);
 void	handle_pipe_redirection(int prev_pipe, int pipefds[2], int next_cmd);
 int		validate_syntax(const char *cmd, int *exit_status);
+char	*find_command_in_path(char *file, char **env);
 /* signals */
 void	signal_handler(int sig);
 void	configure_terminal(void);
 int		initialize_shell(int argc, char *argv[]);
 int		handle_exit(char *line, int exit_status);
-void	process_line(char *line, int *exit_status);
+void	process_line(char *line, int *exit_status, char **env);
 /* redirection */
 void	process_string(char **s);
-char	*remove_quotes(char *str);
-void	handle_redirections(char **args, int *exit_status);
+int		handle_redirections(char **args, int *exit_status, char **env);
 int		handle_arguments(char **args, int exit_status);
 int		handle_input_redirect(char **args, int exit_status, int *i);
 int		handle_output_redirect(char **args, int exit_status, int *i);
-int		handle_here_doc_redirect(char **args, int exit_status, int *i);
-void	handle_redirections(char **args, int *exit_status);
+int		handle_here_doc_redirect(char **args, int exit_status, int *i, char **env);
 
 #endif

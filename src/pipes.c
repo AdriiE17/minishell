@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 15:38:32 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/21 20:59:42 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/26 15:59:42 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,26 +68,26 @@ void	handle_pipe_redirection(int prev_pipe, int pipefds[2], int next_cmd)
 /* Sets up pipe redirections, splits the command into arguments, and executes */
 /* built-in commands or external programs.                                    */
 /* ************************************************************************** */
-void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s)
+void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s, char **env)
 {
 	char	**args;
-	int		i;
+	//int		i;
 
 	args = split_args(sub_t);
 	if (!args[0])
 		exit(*exit_s);
-	i = -1;
-	while (args[++i])
-		process_string(&args[i]);
+	//i = -1;
+	//while (args[++i])
+	//	process_string(&args[i]);
 	handle_pipe_redirection(pipe_d->pre_fd, pipe_d->pipefds, pipe_d->has_cmd);
-	handle_redirections(args, exit_s);
+	handle_redirections(args, exit_s, env);
 	if (ft_is_builtin(args[0]))
 	{
 		ft_exec_builtin(args[0], exit_s);
 		exit(*exit_s);
 	}
 	else
-		execute_and_handle_error(args);
+		execute_and_handle_error(args, env);
 }
 
 /* ************************************************************************** */
@@ -95,7 +95,7 @@ void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s)
 /* Handles pipe creation, forking processes, and chaining commands through    */
 /* pipes. Waits for all child processes to complete.                          */
 /* ************************************************************************** */
-void	handle_pipeline(char *cmd, int *exit_status, t_pipe *pip)
+void	handle_pipeline(char *cmd, int *exit_status, t_pipe *pip, char **env)
 {
 	pid_t	pid;
 
@@ -111,7 +111,7 @@ void	handle_pipeline(char *cmd, int *exit_status, t_pipe *pip)
 			handle_pipe_error();
 		pid = fork();
 		if (pid == 0)
-			handle_child(pip->sub_token, pip, exit_status);
+			handle_child(pip->sub_token, pip, exit_status, env);
 		else if (pid < 0)
 			handle_fork_error();
 		close_pipe(pip->pre_fd);
@@ -124,12 +124,12 @@ void	handle_pipeline(char *cmd, int *exit_status, t_pipe *pip)
 	}
 }
 
-void	execute_pipeline(char *cmd, int *exit_status)
+void	execute_pipeline(char *cmd, int *exit_status, char **env)
 {
 	t_pipe	pipe;
 
 	pipe.pre_fd = -1;
-	handle_pipeline(cmd, exit_status, &pipe);
+	handle_pipeline(cmd, exit_status, &pipe, env);
 	close_pipe(pipe.pre_fd);
 	signal(SIGQUIT, SIG_IGN);
 	while (wait(NULL) > 0)

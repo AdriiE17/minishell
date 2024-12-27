@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 19:39:05 by victor            #+#    #+#             */
-/*   Updated: 2024/12/22 14:04:06 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/26 11:06:56 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ char	*handle_prompt(char *prompt, char *env[])
 /* Processes the input command by expanding environment variables, splitting  */
 /* it into tokens by semicolons, and executing each pipeline of commands.     */
 /* ************************************************************************** */
-void	process_command(char *line, int *exit_status)
+void	process_command(char *line, int *exit_status, char **env)
 {
 	char	*expanded_line;
 	char	*cmd_token;
@@ -114,7 +114,7 @@ void	process_command(char *line, int *exit_status)
 	cmd_token = ft_strtok(expanded_line, ";");
 	while (cmd_token)
 	{
-		execute_pipeline(cmd_token, exit_status);
+		execute_pipeline(cmd_token, exit_status, env);
 		cmd_token = ft_strtok(NULL, ";");
 	}
 	free(expanded_line);
