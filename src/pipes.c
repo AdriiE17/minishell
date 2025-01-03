@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 15:38:32 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/26 15:59:42 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/31 11:20:15 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,14 +71,14 @@ void	handle_pipe_redirection(int prev_pipe, int pipefds[2], int next_cmd)
 void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s, char **env)
 {
 	char	**args;
-	//int		i;
+	int		i;
 
 	args = split_args(sub_t);
 	if (!args[0])
 		exit(*exit_s);
-	//i = -1;
-	//while (args[++i])
-	//	process_string(&args[i]);
+	i = -1;
+	while (args[++i])
+		process_string(&args[i]);
 	handle_pipe_redirection(pipe_d->pre_fd, pipe_d->pipefds, pipe_d->has_cmd);
 	handle_redirections(args, exit_s, env);
 	if (ft_is_builtin(args[0]))

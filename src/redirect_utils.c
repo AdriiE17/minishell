@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 11:28:43 by victor            #+#    #+#             */
-/*   Updated: 2024/12/26 16:11:18 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/31 11:25:27 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	handle_arguments(char **args, int exit_status)
 		expanded = expand_all_env_vars(args[i], exit_status);
 		if (!expanded)
 		{
-			fprintf(stderr, "Error: failed to expand variables\n");
+			printf("Error: failed to expand variables\n");
 			return (1);
 		}
 		free(args[i]);
@@ -39,65 +39,16 @@ int	handle_arguments(char **args, int exit_status)
 }
 
 /* ************************************************************************** */
-/* Handles input redirection using a pipe and a delimiter. It continuously    */
-/* reads input from the user until the delimiter is entered, writing the      */
-/* input to the pipe. The function exits after closing the pipe.              */
-/* ************************************************************************** *
-int	handle_here_doc_input(int pipe_fd[2], char *delimiter)
-{
-	char	*line;
-	size_t	len;
-
-	line = NULL;
-	len = 0;
-	while (1)
-	{
-		printf("> ");
-		if (getline(&line, &len, stdin) == -1)
-			break ;
-		line[strcspn(line, "\n")] = '\0';
-		if (strcmp(line, delimiter) == 0)
-			break ;
-		write(pipe_fd[1], line, strlen(line));
-		write(pipe_fd[1], "\n", 1);
-	}
-	free(line);
-	close(pipe_fd[1]);
-	exit(0);
-	}*/
-int	handle_here_doc_input(int pipe_fd[2], char *delimiter)
-{
-	char	*line;
-
-	while (1)
-	{
-		line = readline("> ");
-		if (!line)
-			break ;
-		if (ft_strcmp(line, delimiter) == 0)
-		{
-			free(line);
-			break ;
-		}
-		write(pipe_fd[1], line, ft_strlen(line));
-		write(pipe_fd[1], "\n", 1);
-		free(line);
-	}
-	close(pipe_fd[1]);
-	exit(0);
-}
-
-/* ************************************************************************** */
 /* Handles input redirection by opening the specified file and redirecting    */
 /* the input stream to that file using dup2. If the file can't be opened, an  */
 /* error message is printed and the function returns 1.                       */
 /* ************************************************************************** */
 int	handle_input_redirect(char **args, int exit_status, int *i)
 {
-	//char	*clean_filename;
 	int		fd_in;
-
-	//clean_filename = remove_quotes(args[*i + 1]);
+	//char	*clean_filename;
+	//clean_filename = process_string(args[*i + 1]);
+	//process_string(args);
 	fd_in = open(args[*i + 1], O_RDONLY);
 	//free(clean_filename);
 	if (fd_in == -1)
@@ -147,6 +98,38 @@ int	handle_output_redirect(char **args, int exit_status, int *i)
 }
 
 /* ************************************************************************** */
+/* Handles input redirection using a pipe and a delimiter. It continuously    */
+/* reads input from the user until the delimiter is entered, writing the      */
+/* input to the pipe. The function exits after closing the pipe.              */
+/* ************************************************************************** */
+int	handle_heredoc_in(int pipe_fd[2], char *cmd, char *delimit, char **env)
+{
+	char	*line;
+	char	*command_path;
+
+	while (1)
+	{
+		line = readline("> ");
+		if (!line)
+			break ;
+		if (ft_strcmp(line, delimit) == 0)
+		{
+			free(line);
+			break ;
+		}
+		write(pipe_fd[1], line, ft_strlen(line));
+		write(pipe_fd[1], "\n", 1);
+		free(line);
+	}
+	command_path = find_command_in_path(cmd, env);
+	if (!command_path)
+		printf("%s: command not found\n", cmd);
+	free(command_path);
+	close(pipe_fd[1]);
+	exit(0);
+}
+
+/* ************************************************************************** */
 /* Handles here document redirection by creating a pipe and forking a child   */
 /* process. The child process reads input from the user until the delimiter   */
 /* is encountered and writes the input to the pipe. The parent process waits  */
@@ -161,13 +144,8 @@ int	handle_here_doc_redirect(char **args, int exit, int *i, char **env)
 
 	command_path = find_command_in_path(args[0], env);
 	if (!command_path)
-	{
-		fprintf(stderr, "%s: Command not found\n", args[0]);
-		handle_here_doc_input(pipe_fd, args[*i + 1]);
-		return 1;
-	}
+		return (handle_heredoc_in(pipe_fd, args[*i - 1], args[*i + 1], env), 1);
 	free(command_path);
-
 	delimite = args[*i + 1];
 	if (pipe(pipe_fd) == -1)
 		return (perror("pipe"), free(delimite), 1);
@@ -175,7 +153,7 @@ int	handle_here_doc_redirect(char **args, int exit, int *i, char **env)
 	if (pid == 0)
 	{
 		close(pipe_fd[0]);
-		handle_here_doc_input(pipe_fd, delimite);
+		handle_heredoc_in(pipe_fd, args[*i - 1], delimite, env);
 		free(delimite);
 	}
 	else if (pid > 0)

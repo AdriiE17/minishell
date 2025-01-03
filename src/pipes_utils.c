@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:56:07 by victor            #+#    #+#             */
-/*   Updated: 2024/12/26 13:20:44 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/31 11:31:48 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,97 +66,24 @@ void	handle_fork_error(void)
 }
 
 /* ************************************************************************** */
-/* Attempts to execute an external command using execvp. If execution fails,  */
+/* Attempts to execute an external command using execve. If execution fails,  */
 /* prints an error message and exits the process.                             */
 /* ************************************************************************** */
-char *find_executable_path(char **paths, char *file)
+void	execute_and_handle_error(char **args, char **env)
 {
-    int i = 0;
-    char *temp;
-    char *path;
+	char	*command_path;
 
-    while (paths[i])
-    {
-        temp = ft_strjoin(paths[i], "/");
-        path = ft_strjoin(temp, file);
-        free(temp);
-        if (access(path, F_OK | X_OK | R_OK) == 0)
-            return (path);
-        free(path);
-        i++;
-    }
-    return (NULL);
+	command_path = find_command_in_path(args[0], env);
+	if (!command_path)
+	{
+		perror("execve: Command not found");
+		exit(EXIT_FAILURE);
+	}
+	if (execve(command_path, args, env) == -1)
+	{
+		perror("execve: Execve failed");
+		free(command_path);
+		exit(EXIT_FAILURE);
+	}
+	free(command_path);
 }
-
-void free_array(char **array)
-{
-    int i = 0;
-
-    while (array[i])
-    {
-        free(array[i]);
-        i++;
-    }
-    free(array);
-}
-
-char *get_path_from_env(char **env)
-{
-    char *path = NULL;
-    int i = 0;
-
-    while (env[i])
-    {
-        if (strncmp(env[i], "PATH=", 5) == 0)
-        {
-            path = strdup(env[i] + 5);
-            break;
-        }
-        i++;
-    }
-    return path;
-}
-
-char *find_command_in_path(char *file, char **env)
-{
-    char **paths;
-    char *path;
-
-    if (file[0] == '/' && access(file, F_OK | X_OK | R_OK) == 0)
-    {
-        path = strdup(file);
-        return (path);
-    }
-    path = get_path_from_env(env);
-    if (!path)
-        return (NULL);
-    paths = ft_split(path, ':');
-    free(path);
-    path = find_executable_path(paths, file);
-    free_array(paths);
-    return (path);
-}
-
-void execute_and_handle_error(char **args, char **env)
-{
-    if (args == NULL || args[0] == NULL) {
-        perror("execveNUEVO: No command provided");
-        exit(EXIT_FAILURE);
-    }
-
-    char *command_path = find_command_in_path(args[0], env);
-
-    if (!command_path) {
-        perror("execveERRORAQUI: Command not found");
-        exit(EXIT_FAILURE);
-    }
-
-    if (execve(command_path, args, env) == -1) {
-        perror("execveSEGUNDO: Execve failed");
-        free(command_path);
-        exit(EXIT_FAILURE);
-    }
-
-    free(command_path);
-}
-

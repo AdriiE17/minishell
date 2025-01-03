@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/12/26 14:24:18 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/31 11:21:51 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -112,7 +112,7 @@ int		handle_exit(char *line, int exit_status);
 void	process_line(char *line, int *exit_status, char **env);
 /* redirection */
 void	process_string(char **s);
-int		handle_redirections(char **args, int *exit_status, char **env);
+void	handle_redirections(char **args, int *exit_status, char **env);
 int		handle_arguments(char **args, int exit_status);
 int		handle_input_redirect(char **args, int exit_status, int *i);
 int		handle_output_redirect(char **args, int exit_status, int *i);

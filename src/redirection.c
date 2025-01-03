@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/04 12:07:58 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/26 16:02:24 by victor           ###   ########.fr       */
+/*   Updated: 2024/12/31 11:29:31 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ void	handle_output_redirection(char **args, int *exit_status, int *i)
 /* ection. If the delimiter is missing, it prints an error message and sets   */
 /* the exit status.                                                           */
 /* ************************************************************************** */
-void	handle_here_doc_redirection(char **args, int *exit_status, int *i, char **env)
+void	handle_here_doc(char **args, int *exit_status, int *i, char **env)
 {
 	if (args[*i + 1])
 		*exit_status = handle_here_doc_redirect(args, *exit_status, i, env);
@@ -68,8 +68,8 @@ void	handle_here_doc_redirection(char **args, int *exit_status, int *i, char **e
 /* corresponding handler function (handle_input_redirection, handle_output_   */
 /* redirection, or handle_here_doc_redirection). It increments the index to   */
 /* process all arguments.                                                     */
-/* ************************************************************************** *
-void	handle_redirections(char **args, int *exit_status)
+/* ************************************************************************** */
+void	handle_redirections(char **args, int *exit_status, char **env)
 {
 	int	i;
 
@@ -81,33 +81,8 @@ void	handle_redirections(char **args, int *exit_status)
 		else if (ft_strcmp(args[i], ">") == 0 || ft_strcmp(args[i], ">>") == 0)
 			handle_output_redirection(args, exit_status, &i);
 		else if (ft_strcmp(args[i], "<<") == 0)
-			handle_here_doc_redirection(args, exit_status, &i);
+			handle_here_doc(args, exit_status, &i, env);
 		i++;
 	}
 	signal(SIGQUIT, signal_handler);
-}*/
-int handle_redirections(char **args, int *exit_status, char **env)
-{
-    int i = 0;
-
-    /*char *command_path = find_command_in_path(args[0], env);
-    if (!command_path)
-    {
-        perror("execveN: Command not found");
-        *exit_status = 1;
-        return 1;
-    }*/
-    while (args[i])
-    {
-        if (ft_strcmp(args[i], "<") == 0)
-            handle_input_redirection(args, exit_status, &i);
-        else if (ft_strcmp(args[i], ">") == 0 || ft_strcmp(args[i], ">>") == 0)
-            handle_output_redirection(args, exit_status, &i);
-        else if (ft_strcmp(args[i], "<<") == 0)
-            handle_here_doc_redirection(args, exit_status, &i, env);
-        i++;
-    }
-    signal(SIGQUIT, signal_handler);
-    return 0;  
 }
-
