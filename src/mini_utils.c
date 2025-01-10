@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 19:39:05 by victor            #+#    #+#             */
-/*   Updated: 2024/12/26 11:06:56 by victor           ###   ########.fr       */
+/*   Updated: 2025/01/09 11:04:37 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,6 @@ char	*handle_prompt(char *prompt, char *env[])
 {
 	char	*line;
 
-	write(STDOUT_FILENO, "\r", 1);
 	construct_prompt(prompt, env);
 	g_signal_received = 0;
 	line = readline(prompt);
