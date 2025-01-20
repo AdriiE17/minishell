@@ -17,10 +17,10 @@
 /* and calling the corresponding function to perform the redirection. If the  */
 /* filename is missing, it prints an error message and sets the exit status.  */
 /* ************************************************************************** */
-void	handle_input_redirection(char **args, int *exit_status, int *i)
+void	handle_input_redirection(char **args, int *exit_status, int *i, char **env)
 {
 	if (args[*i + 1])
-		*exit_status = handle_input_redirect(args, *exit_status, i);
+		*exit_status = handle_input_redirect(args, *exit_status, i, env);
 	else
 	{
 		printf("Error: missing filename after '<'\n");
@@ -34,10 +34,10 @@ void	handle_input_redirection(char **args, int *exit_status, int *i)
 /* If the filename is missing, it prints an error message and sets the exit   */
 /* status.                                                                    */
 /* ************************************************************************** */
-void	handle_output_redirection(char **args, int *exit_status, int *i)
+void	handle_output_redirection(char **args, int *exit_status, int *i, char **env)
 {
 	if (args[*i + 1])
-		*exit_status = handle_output_redirect(args, *exit_status, i);
+		*exit_status = handle_output_redirect(args, *exit_status, i, env);
 	else
 	{
 		printf("Error: missing file after '%s'\n", args[*i]);
@@ -77,9 +77,9 @@ void	handle_redirections(char **args, int *exit_status, char **env)
 	while (args[i])
 	{
 		if (ft_strcmp(args[i], "<") == 0)
-			handle_input_redirection(args, exit_status, &i);
+			handle_input_redirection(args, exit_status, &i, env);
 		else if (ft_strcmp(args[i], ">") == 0 || ft_strcmp(args[i], ">>") == 0)
-			handle_output_redirection(args, exit_status, &i);
+			handle_output_redirection(args, exit_status, &i, env);
 		else if (ft_strcmp(args[i], "<<") == 0)
 			handle_here_doc(args, exit_status, &i, env);
 		i++;

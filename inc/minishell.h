@@ -114,8 +114,8 @@ void	process_line(char *line, int *exit_status, char **env);
 void	process_string(char **s);
 void	handle_redirections(char **args, int *exit_status, char **env);
 int		handle_arguments(char **args, int exit_status);
-int		handle_input_redirect(char **args, int exit_status, int *i);
-int		handle_output_redirect(char **args, int exit_status, int *i);
+int		handle_input_redirect(char **args, int exit_status, int *i, char **env);
+int		handle_output_redirect(char **args, int exit_status, int *i, char **env);
 int		handle_here_doc_redirect(char **args, int exit_status, int *i, char **env);
 
 #endif

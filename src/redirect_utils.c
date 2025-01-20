@@ -42,7 +42,7 @@ int	handle_arguments(char **args, int exit_status)
 /* Handles input redirection by opening the specified file and redirecting    */
 /* the input stream to that file using dup2. If the file can't be opened, an  */
 /* error message is printed and the function returns 1.                       */
-/* ************************************************************************** */
+/* ************************************************************************** *
 int	handle_input_redirect(char **args, int exit_status, int *i)
 {
 	int		fd_in;
@@ -67,14 +67,60 @@ int	handle_input_redirect(char **args, int exit_status, int *i)
 	args[*i + 1] = NULL;
 	(*i)++;
 	return (exit_status);
+}*/
+int	handle_input_redirect(char **args, int exit_status, int *i, char **env)
+{
+	int		fd_in;
+	char	*filename;
+	char	*command_path;
+
+	// Verifica si el comando es válido antes de procesar la redirección
+	command_path = find_command_in_path(args[0], env);
+	if (!command_path)
+	{
+		printf("%s: command not found\n", args[0]);
+		return (1);
+	}
+	free(command_path);
+
+	// Procesa el nombre del archivo (expansión de variables y eliminación de comillas)
+	filename = strdup(args[*i + 1]);
+	if (!filename)
+		return (perror("strdup"), 1);
+	process_string(&filename);
+
+	// Intenta abrir el archivo para redirección
+	fd_in = open(filename, O_RDONLY);
+	free(filename); // Libera la memoria del nombre del archivo
+	if (fd_in == -1)
+	{
+		perror(args[*i + 1]);
+		return (1);
+	}
+
+	// Redirige STDIN al archivo
+	if (dup2(fd_in, STDIN_FILENO) == -1)
+	{
+		perror("dup2");
+		close(fd_in);
+		return (1);
+	}
+
+	// Cierra el descriptor de archivo y actualiza args
+	close(fd_in);
+	args[*i] = NULL;
+	args[*i + 1] = NULL;
+	(*i)++;
+	return (exit_status);
 }
+
 
 /* ************************************************************************** */
 /* Handles output redirection by opening the specified file and redirecting   */
 /* the output stream to that file. It also handles appending ('>>') or        */
 /* overwriting ('>') based on the redirection type. If the file can't be      */
 /* opened, an error message is printed and the function returns 1.            */
-/* ************************************************************************** */
+/* ************************************************************************** *
 int	handle_output_redirect(char **args, int exit_status, int *i)
 {
 	int		fd_out;
@@ -90,6 +136,51 @@ int	handle_output_redirect(char **args, int exit_status, int *i)
 		return (perror(args[*i + 1]), 1);
 	if (dup2(fd_out, STDOUT_FILENO) == -1)
 		return (perror("dup2"), close(fd_out), 1);
+	close(fd_out);
+	args[*i] = NULL;
+	args[*i + 1] = NULL;
+	(*i)++;
+	return (exit_status);
+}*/
+int	handle_output_redirect(char **args, int exit_status, int *i, char **env)
+{
+	int		fd_out;
+	int		flags;
+	char	*filename;
+	char	*command_path;
+
+	// Verifica si el comando es válido
+	command_path = find_command_in_path(args[0], env);
+	if (!command_path)
+	{
+		printf("%s: command not found\n", args[0]);
+		return (1);
+	}
+	free(command_path);
+
+	// Procesa el nombre del archivo (expansión de variables y eliminación de comillas)
+	filename = strdup(args[*i + 1]);
+	if (!filename)
+		return (perror("strdup"), 1);
+	process_string(&filename);
+
+	// Configura los flags según el operador de redirección
+	if (strcmp(args[*i], ">>") == 0)
+		flags = O_WRONLY | O_CREAT | O_APPEND;
+	else
+		flags = O_WRONLY | O_CREAT | O_TRUNC;
+
+	// Intenta abrir el archivo para redirección
+	fd_out = open(filename, flags, 0644);
+	free(filename); // Libera memoria del nombre del archivo
+	if (fd_out == -1)
+		return (perror(args[*i + 1]), 1);
+
+	// Redirige STDOUT al archivo
+	if (dup2(fd_out, STDOUT_FILENO) == -1)
+		return (perror("dup2"), close(fd_out), 1);
+
+	// Cierra el descriptor de archivo y actualiza args
 	close(fd_out);
 	args[*i] = NULL;
 	args[*i + 1] = NULL;
