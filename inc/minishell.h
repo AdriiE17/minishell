@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2024/12/31 11:21:51 by victor           ###   ########.fr       */
+/*   Updated: 2025/01/22 18:53:42 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -115,7 +115,9 @@ void	process_string(char **s);
 void	handle_redirections(char **args, int *exit_status, char **env);
 int		handle_arguments(char **args, int exit_status);
 int		handle_input_redirect(char **args, int exit_status, int *i, char **env);
-int		handle_output_redirect(char **args, int exit_status, int *i, char **env);
-int		handle_here_doc_redirect(char **args, int exit_status, int *i, char **env);
+int		handle_output_redirect(char **args, int exit_statu, int *i, char **env);
+int		handle_here_doc_redirect(char **args, int exit_sta, int *i, char **env);
+int		fork_heredoc_pipe(int pipe_fd[2], char *cmd, char *delimit, char **env);
+int		handle_heredoc_in(int pipe_fd[2], char *cmd, char *delimit, char **env);
 
 #endif

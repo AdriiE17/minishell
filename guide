@@ -75,21 +75,4 @@ cat * | sed -e 's/\/\*.*\*\// /g' -e '/\/\*/,/\*\//d' -e '/^[[:space:]]*$/d'
 
 
 ^[[200~/bin/echo hola > a
-execve: Command not found: No such file or directory
 
-=================================================================
-==2380671==ERROR: LeakSanitizer: detected memory leaks
-
-Direct leak of 4 byte(s) in 2 object(s) allocated from:
-    #0 0x485f34 in strdup (/home/vberdugo/Projects/minishell/minishell+0x485f34)
-    #1 0x4db220 in remove_q /home/vberdugo/Projects/minishell/src/quotes.c:71:7
-    #2 0x4db84d in process_string /home/vberdugo/Projects/minishell/src/quotes.c:99:2
-    #3 0x4d0460 in handle_child /home/vberdugo/Projects/minishell/src/pipes.c:81:3
-    #4 0x4d1163 in handle_pipeline /home/vberdugo/Projects/minishell/src/pipes.c:114:4
-    #5 0x4d192b in execute_pipeline /home/vberdugo/Projects/minishell/src/pipes.c:132:2
-    #6 0x4d4771 in process_command /home/vberdugo/Projects/minishell/src/mini_utils.c:117:3
-    #7 0x4d4f2d in process_line /home/vberdugo/Projects/minishell/src/signals.c:115:2
-    #8 0x4cb5b0 in main /home/vberdugo/Projects/minishell/src/minishell.c:32:3
-    #9 0x7f1d7dbc1d8f in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-
-SUMMARY: AddressSanitizer: 4 byte(s) leaked in 2 allocation(s).
