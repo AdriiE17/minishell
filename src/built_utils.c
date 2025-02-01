@@ -6,75 +6,41 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 12:03:53 by victor            #+#    #+#             */
-/*   Updated: 2024/12/06 11:28:00 by victor           ###   ########.fr       */
+/*   Updated: 2025/01/31 18:04:47 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	ft_execute_echo(int *exit_status)
+void ft_execute_echo(char **cmd, int *exit_status)
 {
-	char	*arg;
-
-	arg = ft_strtok(NULL, " ");
-	(void)exit_status;
-	if (arg == NULL)
-	{
-		printf("echo ejecutado desde ft_execute_echo\n");
-	}
+    *exit_status = blt_echo(cmd + 1);
 }
 
-void	ft_execute_export(int *exit_status)
+void ft_execute_export(char **cmd, char **env)
 {
-	char	*var;
-	char	*value;
+    int result;
 
-	var = ft_strtok(NULL, " ");
-	if (var)
-	{
-		value = ft_strtok(NULL, " ");
-		if (value)
-		{
-			setenv(var, value, 1);
-			*exit_status = 0;
-		}
-		else
-		{
-			write(STDERR_FILENO, "export: invalid argument\n", 25);
-			*exit_status = 1;
-		}
-	}
+    if (!cmd[1])  // Si no hay variables a exportar, solo imprimimos las exportadas.
+    {
+        print_exported_vars(env);
+        return;
+    }
+    result = assign_export_vars(cmd, env);  
+    if (result)
+    {
+        ft_putstr_fd("Error: invalid syntax for export\n", 2);
+    }
 }
 
-void	ft_execute_unset(int *exit_status)
+void	ft_execute_unset(char **av, char **env)
 {
-	char	*var;
-
-	var = ft_strtok(NULL, " ");
-	if (var)
-	{
-		unsetenv(var);
-		*exit_status = 0;
-	}
-	else
-	{
-		write(STDERR_FILENO, "unset: invalid argument\n", 24);
-		*exit_status = 1;
-	}
+	blt_unset(av, env);
 }
 
-void	ft_execute_env(int *exit_status)
+void	ft_execute_env(char **env)
 {
-	extern char	**environ;
-	int			i;
-
-	i = -1;
-	while (environ[++i] != NULL)
-	{
-		write(STDOUT_FILENO, environ[i], ft_strlen(environ[i]));
-		write(STDOUT_FILENO, "\n", 1);
-	}
-	*exit_status = 0;
+	blt_env(env);
 }
 
 void	ft_execute_pwd(int *exit_status)
