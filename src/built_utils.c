@@ -6,31 +6,31 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 12:03:53 by victor            #+#    #+#             */
-/*   Updated: 2025/01/31 18:04:47 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/01 13:50:27 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void ft_execute_echo(char **cmd, int *exit_status)
+void	ft_execute_echo(char **cmd, int *exit_status)
 {
-    *exit_status = blt_echo(cmd + 1);
+	*exit_status = blt_echo(cmd + 1);
 }
 
-void ft_execute_export(char **cmd, char **env)
+void	ft_execute_export(char **cmd, char **env)
 {
-    int result;
+	int	result;
 
-    if (!cmd[1])  // Si no hay variables a exportar, solo imprimimos las exportadas.
-    {
-        print_exported_vars(env);
-        return;
-    }
-    result = assign_export_vars(cmd, env);  
-    if (result)
-    {
-        ft_putstr_fd("Error: invalid syntax for export\n", 2);
-    }
+	if (!cmd[1])
+	{
+		print_exported_vars(env);
+		return ;
+	}
+	result = assign_export_vars(cmd, env);
+	if (result)
+	{
+		ft_putstr_fd("Error: invalid syntax for export\n", 2);
+	}
 }
 
 void	ft_execute_unset(char **av, char **env)

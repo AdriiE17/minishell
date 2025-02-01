@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:14:01 by victor            #+#    #+#             */
-/*   Updated: 2025/01/31 18:05:09 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/01 12:11:34 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef MINISHELL_H
@@ -86,7 +86,7 @@ char	*handle_multiline_input(char *initial_line);
 char	*expand_all_env_vars(char *input, int exit_status);
 /* built-ins */
 int		ft_is_builtin(char *cmd);
-void    ft_exec_builtin(char **cmd, int *exit_status, char **env);
+void	ft_exec_builtin(char **cmd, int *exit_status, char **env);
 void	ft_execute_cd(char **cmd, char **env);
 void	ft_execute_echo(char **cmd, int *exit_status);
 void	ft_execute_export(char **cmd, char **env);
@@ -94,10 +94,10 @@ void	ft_execute_unset(char **cmd, char **env);
 void	ft_execute_env(char **env);
 void	ft_execute_pwd(int *exit_status);
 int		blt_echo(char **av);
-int assign_export_vars(char **av, char **env);
-int print_exported_vars(char **env);
-int blt_env(char **env);
-int blt_unset(char **av, char **env);
+int		assign_export_vars(char **av, char **env);
+int		print_exported_vars(char **env);
+int		blt_env(char **env);
+int		blt_unset(char **av, char **env);
 /* pipes */
 t_expan	init_expan(const char *cmd);
 void	handle_pipe_error(void);

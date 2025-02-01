@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 15:38:32 by vberdugo          #+#    #+#             */
-/*   Updated: 2025/01/30 20:15:59 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/01 16:03:44 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s, char **env)
 {
 	char	**args;
 	int		i;
-	
+
 	args = split_args(sub_t);
 	if (!args[0])
 		exit(*exit_s);
@@ -81,12 +81,6 @@ void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s, char **env)
 		process_string(&args[i]);
 	handle_pipe_redirection(pipe_d->pre_fd, pipe_d->pipefds, pipe_d->has_cmd);
 	handle_redirections(args, exit_s, env);
-	//if (ft_is_builtin(args[0]))
-	//{
-	//	ft_exec_builtin(args, exit_s, env);
-	//	exit(*exit_s);
-	//}
-	//else
 	execute_and_handle_error(args, env);
 }
 
@@ -98,7 +92,10 @@ void	handle_child(char *sub_t, t_pipe *pipe_d, int *exit_s, char **env)
 void	handle_pipeline(char *cmd, int *exit_status, t_pipe *pip, char **env)
 {
 	pid_t	pid;
+	char	**args;
+	int		i;
 
+	i = -1;
 	if (validate_syntax(cmd, exit_status))
 		return ;
 	pip->in_q = 0;
@@ -109,17 +106,15 @@ void	handle_pipeline(char *cmd, int *exit_status, t_pipe *pip, char **env)
 		pip->has_cmd = (cmd != NULL && *cmd != '\0');
 		if (pipe(pip->pipefds) == -1)
 			handle_pipe_error();
-
-		char **args = split_args(pip->sub_token);
+		args = split_args(pip->sub_token);
 		if (ft_is_builtin(args[0]))
 		{
 			ft_exec_builtin(args, exit_status, env);
-			break;
+			break ;
 		}
-		for (int i = 0; args[i] != NULL; i++)
+		while (args[++i] != NULL)
 			free(args[i]);
 		free(args);
-
 		pid = fork();
 		if (pid == 0)
 			handle_child(pip->sub_token, pip, exit_status, env);

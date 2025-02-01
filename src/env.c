@@ -6,62 +6,57 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/31 11:46:45 by victor            #+#    #+#             */
-/*   Updated: 2025/01/31 11:58:10 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/01 16:28:01 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int blt_env(char **env)
+int	blt_env(char **env)
 {
-	int i = 0;
+	int	i;
 
-    // Recorremos el arreglo de entorno
-    while (env[i])
-    {
-        // Imprimimos cada variable de entorno
-        ft_printf("%s\n", env[i]);
-        i++;
-    }
-
-    return 0;
+	i = 0;
+	while (env[i])
+	{
+		ft_printf("%s\n", env[i]);
+		i++;
+	}
+	return (0);
 }
 
-
-int blt_unset(char **av, char **env)
+int	blt_unset(char **av, char **env)
 {
-    int i;
-    int j;
+	int		i;
+	int		j;
+	int		k;
+	char	*key;
 
-    i = 1;
-    if (!av[1])
-    {
-        ft_printf("unset: not enough arguments\n");
-        return (1);
-    }
-
-    // Recorremos los argumentos para eliminar las variables de entorno
-    while (av[i])
-    {
-        j = 0;
-        // Buscamos la variable en el arreglo de entorno y la eliminamos si existe
-        while (env[j])
-        {
-            if (ft_strcmp(av[i], env[j]) == 0)
-            {
-                // Desplazamos las variables en el arreglo para "eliminar" la actual
-                while (env[j])
-                {
-                    env[j] = env[j + 1];
-                    j++;
-                }
-                break;
-            }
-            j++;
-        }
-        i++;
-    }
-
-    return (0);
+	i = 1;
+	if (!av[1])
+		return (ft_printf("unset: not enough arguments\n"), 1);
+	while (av[i])
+	{
+		j = 0;
+		while (env[j])
+		{
+			key = ft_substr(env[j], 0, ft_strchr(env[j], '=') - env[j]);
+			if (ft_strcmp(av[i], key) == 0)
+			{
+				free(key);
+				free(env[j]);
+				k = j;
+				while (env[k])
+				{
+					env[k] = env[k + 1];
+					k++;
+				}
+				break ;
+			}
+			free(key);
+			j++;
+		}
+		i++;
+	}
+	return (0);
 }
-

@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/26 18:34:47 by victor            #+#    #+#             */
-/*   Updated: 2025/01/31 11:52:21 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/01 15:10:00 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,79 +33,79 @@ int	ft_is_builtin(char *cmd)
 /* directory, setting/unsetting environment variables, or printing environment*/
 /* variables. The exit status is updated accordingly for each command.        */
 /* ************************************************************************** */
-void ft_exec_builtin(char **cmd, int *exit_status, char **env)
+void	ft_exec_builtin(char **cmd, int *exit_status, char **env)
 {
-    if (ft_strcmp(cmd[0], "cd") == 0)
-        ft_execute_cd(cmd, env);
-    else if (ft_strcmp(cmd[0], "echo") == 0)
-        ft_execute_echo(cmd, exit_status);
-    else if (ft_strcmp(cmd[0], "export") == 0)
-        ft_execute_export(cmd, env);
-    else if (ft_strcmp(cmd[0], "unset") == 0)
-        ft_execute_unset(cmd, env);
-    else if (ft_strcmp(cmd[0], "env") == 0)
-        ft_execute_env(env);
-    else if (ft_strcmp(cmd[0], "pwd") == 0)
-        ft_execute_pwd(exit_status);
+	int	i;
 
-    for (int i = 0; cmd[i] != NULL; i++)
-    {
-        free(cmd[i]); 
-    }
-    free(cmd); 
+	i = -1;
+	if (ft_strcmp(cmd[0], "cd") == 0)
+		ft_execute_cd(cmd, env);
+	else if (ft_strcmp(cmd[0], "echo") == 0)
+		ft_execute_echo(cmd, exit_status);
+	else if (ft_strcmp(cmd[0], "export") == 0)
+		ft_execute_export(cmd, env);
+	else if (ft_strcmp(cmd[0], "unset") == 0)
+		ft_execute_unset(cmd, env);
+	else if (ft_strcmp(cmd[0], "env") == 0)
+		ft_execute_env(env);
+	else if (ft_strcmp(cmd[0], "pwd") == 0)
+		ft_execute_pwd(exit_status);
+	while (cmd[++i] != NULL)
+	{
+		free(cmd[i]);
+	}
+	free(cmd);
 }
 
-void ft_execute_cd(char **av, char **env)
+void	ft_execute_cd(char **av, char **env)
 {
-    static char oldpwd[PATH_MAX] = "";
-    char *path;
-    int result;
-    char buf[PATH_MAX];
-    char *tmp;
-    (void)env;
+	static char	oldpwd[PATH_MAX] = "";
+	char		*path;
+	int			result;
+	char		buf[PATH_MAX];
+	char		*tmp;
 
-    result = 0;
-    if (!av[1])
-    {
-        path = getenv("HOME");
-        if (!path)
-        {
-            printf("cd: HOME not set\n");
-            return;
-        }
-    }
-    else if (strcmp(av[1], "-") == 0) // Si el usuario escribe "cd -"
-    {
-        if (oldpwd[0] == '\0') // Si oldpwd no está inicializado
-        {
-            printf("cd: OLDPWD not set\n");
-            return;
-        }
-        printf("%s\n", oldpwd); // Mostrar el directorio al que cambiamos
-        path = oldpwd;
-    }
-    else
-    {
-        path = av[1];
-    }
-
-    if (chdir(path) != 0)
-    {
-        perror("cd");
-        result = 1;
-    }
-    if (!result)
-    {
-        tmp = getenv("PWD");
-        if (tmp)
-        {
-            strncpy(oldpwd, tmp, PATH_MAX - 1); // Guardar PWD en oldpwd
-            oldpwd[PATH_MAX - 1] = '\0'; // Asegurar el null-terminator
-        }
-        if (getcwd(buf, sizeof(buf)) != NULL)
-        {
-            setenv("PWD", buf, 1);
-        }
-    }
+	(void)env;
+	result = 0;
+	if (!av[1])
+	{
+		path = getenv("HOME");
+		if (!path)
+		{
+			printf("cd: HOME not set\n");
+			return ;
+		}
+	}
+	else if (strcmp(av[1], "-") == 0)
+	{
+		if (oldpwd[0] == '\0')
+		{
+			printf("cd: OLDPWD not set\n");
+			return ;
+		}
+		printf("%s\n", oldpwd);
+		path = oldpwd;
+	}
+	else
+	{
+		path = av[1];
+	}
+	if (chdir(path) != 0)
+	{
+		perror("cd");
+		result = 1;
+	}
+	if (!result)
+	{
+		tmp = getenv("PWD");
+		if (tmp)
+		{
+			strncpy(oldpwd, tmp, PATH_MAX - 1);
+			oldpwd[PATH_MAX - 1] = '\0';
+		}
+		if (getcwd(buf, sizeof(buf)) != NULL)
+		{
+			setenv("PWD", buf, 1);
+		}
+	}
 }
-
