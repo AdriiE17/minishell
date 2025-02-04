@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/31 11:07:13 by victor            #+#    #+#             */
-/*   Updated: 2025/02/01 16:29:40 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/04 19:55:06 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,23 @@ int	assign_single_var(char *arg, char **env)
 	if (!check_key(arg))
 		return (1);
 	equal_sign = ft_strchr(arg, '=');
+	if (!equal_sign) 
+		return (0);
+
+	char	*key;
+	char	*value;
+	key = ft_substr(arg, 0, equal_sign - arg);
+	value = ft_strdup(equal_sign + 1);
+	if (!key || !value)
+	{
+		free(key);
+		free(value);
+		return (1);
+	}
+	setenv(key, value, 1);
+		free(key);
+		free(value);
+
 	if (equal_sign)
 	{
 		pair[0] = ft_substr(arg, 0, equal_sign - arg);
@@ -141,7 +158,6 @@ int	assign_single_var(char *arg, char **env)
 	}
 	return (0);
 }
-
 // Asigna las variables exportadas
 int	assign_export_vars(char **av, char **env)
 {
