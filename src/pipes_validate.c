@@ -6,7 +6,7 @@
 /*   By: vberdugo <vberdugo@student.42barcelon      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/16 13:45:43 by vberdugo          #+#    #+#             */
-/*   Updated: 2024/12/22 14:03:06 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/05 17:59:38 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,4 +85,33 @@ char	*handle_multiline_input(char *initial_line)
 		joined_line = new_line;
 	}
 	return (free(initial_line), joined_line);
+}
+
+char	**split_args(const char *cmd)
+{
+	t_expan	exp;
+	char	*token;
+	char	**tm;
+
+	exp = init_expan(cmd);
+	if (!exp.cmd_copy)
+		return (NULL);
+	exp.arg = NULL;
+	token = ft_strsep(&exp.ptr, " ", &exp.in_single, &exp.quote_char);
+	while (token != NULL)
+	{
+		if (*token != '\0')
+		{
+			tm = ft_realloc(exp.arg, S_PTR * exp.ind, S_PTR * (exp.ind + 1));
+			if (!tm)
+				return (free(exp.cmd_copy), free(exp.arg), NULL);
+			exp.arg = tm;
+			exp.arg[exp.ind++] = ft_strdup(token);
+		}
+		token = ft_strsep(&exp.ptr, " ", &exp.in_single, &exp.quote_char);
+	}
+	tm = ft_realloc(exp.arg, S_PTR * exp.ind, S_PTR * (exp.ind + 1));
+	if (!tm)
+		return (free(exp.cmd_copy), NULL);
+	return (exp.arg = tm, exp.arg[exp.ind] = NULL, free(exp.cmd_copy), exp.arg);
 }

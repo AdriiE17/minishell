@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 11:15:41 by victor            #+#    #+#             */
-/*   Updated: 2024/12/31 11:32:27 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/05 17:04:14 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,12 +68,21 @@ char	*find_command_in_path(char *file, char **env)
 {
 	char	**paths;
 	char	*path;
+	char	*current_dir_path;
 
 	if (file[0] == '/' && access(file, F_OK | X_OK | R_OK) == 0)
 	{
 		path = ft_strdup(file);
 		return (path);
 	}
+	current_dir_path = ft_strjoin("./", file);
+	if (access(current_dir_path, F_OK | X_OK | R_OK) == 0)
+	{
+		path = ft_strdup(current_dir_path);
+		free(current_dir_path);
+		return (path);
+	}
+	free(current_dir_path);
 	path = get_path_from_env(env);
 	if (!path)
 		return (NULL);

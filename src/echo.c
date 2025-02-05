@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/31 10:50:27 by victor            #+#    #+#             */
-/*   Updated: 2025/02/01 14:15:09 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/05 17:18:28 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ static bool	check_n(char **av, int *j)
 	return (n);
 }
 
-int	blt_echo(char **av)
+int	exe_echo(char **av)
 {
 	bool	n;
 	int		j;

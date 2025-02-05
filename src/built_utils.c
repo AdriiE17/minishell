@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 12:03:53 by victor            #+#    #+#             */
-/*   Updated: 2025/02/01 13:50:27 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/05 17:28:28 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void	ft_execute_echo(char **cmd, int *exit_status)
 {
-	*exit_status = blt_echo(cmd + 1);
+	*exit_status = exe_echo(cmd + 1);
 }
 
 void	ft_execute_export(char **cmd, char **env)
@@ -33,14 +33,17 @@ void	ft_execute_export(char **cmd, char **env)
 	}
 }
 
-void	ft_execute_unset(char **av, char **env)
-{
-	blt_unset(av, env);
-}
-
 void	ft_execute_env(char **env)
 {
-	blt_env(env);
+	int	i;
+
+	i = 0;
+	while (env[i])
+	{
+		ft_printf("%s\n", env[i]);
+		i++;
+	}
+	return ;
 }
 
 void	ft_execute_pwd(int *exit_status)
@@ -58,4 +61,33 @@ void	ft_execute_pwd(int *exit_status)
 		perror("pwd");
 		*exit_status = 1;
 	}
+}
+
+int	ft_execute_unset(char **av, char **env)
+{
+	int		i;
+	int		j;
+	char	*key;
+
+	i = -1;
+	if (!av[1])
+		return (ft_printf("unset: not enough arguments\n"), 1);
+	while (av[++i])
+	{
+		j = 0;
+		while (env[j])
+		{
+			key = ft_substr(env[j], 0, ft_strchr(env[j], '=') - env[j]);
+			if (ft_strcmp(av[i], key) == 0)
+			{
+				free(key);
+				free(env[j]);
+				remove_env_variable(j, env);
+				break ;
+			}
+			free(key);
+			j++;
+		}
+	}
+	return (0);
 }

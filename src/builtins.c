@@ -6,7 +6,7 @@
 /*   By: victor <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/26 18:34:47 by victor            #+#    #+#             */
-/*   Updated: 2025/02/01 15:10:00 by victor           ###   ########.fr       */
+/*   Updated: 2025/02/05 17:17:44 by victor           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ void	ft_exec_builtin(char **cmd, int *exit_status, char **env)
 
 	i = -1;
 	if (ft_strcmp(cmd[0], "cd") == 0)
-		ft_execute_cd(cmd, env);
+		ft_execute_cd(cmd);
 	else if (ft_strcmp(cmd[0], "echo") == 0)
 		ft_execute_echo(cmd, exit_status);
 	else if (ft_strcmp(cmd[0], "export") == 0)
@@ -57,55 +57,62 @@ void	ft_exec_builtin(char **cmd, int *exit_status, char **env)
 	free(cmd);
 }
 
-void	ft_execute_cd(char **av, char **env)
+static char	*get_target_path(char **av, char *oldpwd)
 {
-	static char	oldpwd[PATH_MAX] = "";
-	char		*path;
-	int			result;
-	char		buf[PATH_MAX];
-	char		*tmp;
+	char	*home;
 
-	(void)env;
-	result = 0;
 	if (!av[1])
 	{
-		path = getenv("HOME");
-		if (!path)
+		home = getenv("HOME");
+		if (!home)
 		{
 			printf("cd: HOME not set\n");
-			return ;
+			return (NULL);
 		}
+		return (home);
 	}
-	else if (strcmp(av[1], "-") == 0)
+	if (strcmp(av[1], "-") == 0)
 	{
 		if (oldpwd[0] == '\0')
 		{
 			printf("cd: OLDPWD not set\n");
-			return ;
+			return (NULL);
 		}
 		printf("%s\n", oldpwd);
-		path = oldpwd;
+		return (oldpwd);
 	}
-	else
+	return (av[1]);
+}
+
+static void	update_directories(char *oldpwd)
+{
+	char	buf[PATH_MAX];
+	char	*tmp;
+
+	tmp = getenv("PWD");
+	if (tmp)
 	{
-		path = av[1];
+		strncpy(oldpwd, tmp, PATH_MAX - 1);
+		oldpwd[PATH_MAX - 1] = '\0';
 	}
+	if (getcwd(buf, sizeof(buf)) != NULL)
+	{
+		setenv("PWD", buf, 1);
+	}
+}
+
+void	ft_execute_cd(char **av)
+{
+	static char	oldpwd[PATH_MAX] = "";
+	char		*path;
+
+	path = get_target_path(av, oldpwd);
+	if (!path)
+		return ;
 	if (chdir(path) != 0)
 	{
 		perror("cd");
-		result = 1;
+		return ;
 	}
-	if (!result)
-	{
-		tmp = getenv("PWD");
-		if (tmp)
-		{
-			strncpy(oldpwd, tmp, PATH_MAX - 1);
-			oldpwd[PATH_MAX - 1] = '\0';
-		}
-		if (getcwd(buf, sizeof(buf)) != NULL)
-		{
-			setenv("PWD", buf, 1);
-		}
-	}
+	update_directories(oldpwd);
 }
